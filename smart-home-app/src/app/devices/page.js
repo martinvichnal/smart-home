@@ -11,7 +11,8 @@ export default async function Devices() {
 
     return (
         <div className="" id="devices">
-            <div className="grid grid-cols-3 gap-4 grid-flow-row justify-center items-center h-screen">
+            {/* <div className="grid grid-cols-3 gap-4 grid-flow-row justify-center items-center h-screen"> */}
+            <div className="flex flex-wrap lg:justify-evenly md:justify-evenly sm:justify-center">
                 {data.map((device) => (
                     <DeviceBox device={device} key={device.did} />
                 ))}

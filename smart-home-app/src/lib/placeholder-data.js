@@ -31,7 +31,12 @@ export const data = [
     {
         did: "f33573d762614e47a0008659bb5de53e",
         dn: "Bedroom Switcher Hub",
-        dd: "Power-b-false--battery-n-0-100-50.2--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true--Air Conditioner-b-false--Door-b-false--Window-b-false",
+        dd: "Power-b-true--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true",
+    },
+    {
+        did: "08659bb5de53e40c48b07ab90b25d29e4",
+        dn: "Kitchen Switcher Hub",
+        dd: "Power-b-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false",
     },
     {
         did: "a550b29757374abda73c15d29e2cd1e1",

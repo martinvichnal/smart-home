@@ -27,9 +27,11 @@ export async function GET(request) {
             }
         )
     } else {
-        console.log("false")
-        return Response("Hello, Next.js!", {
+        return NextResponse.json(data, {
             status: 200,
         })
     }
+    // return NextResponse.json(data, {
+    //     status: 200,
+    // })
 }

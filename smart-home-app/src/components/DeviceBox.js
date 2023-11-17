@@ -88,10 +88,10 @@ const DeviceBox = ({ device }) => {
 
     return (
         <div className="m-6 p-6 bg-white border border-gray-200 rounded-lg shadow-lg">
-            <h2 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+            <h2 className="pb-8 text-2xl font-bold tracking-tight text-gray-900">
                 {device.dn}
             </h2>
-            <div className="p-6 grid grid-cols-3 gap-4 grid-flow-row justify-center items-center">
+            <div className="grid grid-cols-2 gap-8 justify-start">
                 {device.dd.split("--").map((item) => {
                     if (item) {
                         const [name, type, ...params] = item.split("-")

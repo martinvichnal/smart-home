@@ -11,6 +11,14 @@ const links = [
     // { name: "Home", href: "/", icon: HomeIcon },
     { name: "Home", href: "/" },
     { name: "Devices", href: "/devices" },
+    { name: "Testing", href: "/tester" },
+    { name: "Settings", href: "/" },
+    { name: "API / Users", href: "/api/auth" },
+    { name: "API / Device", href: "/api/device" },
+    {
+        name: "API / Device with ID",
+        href: "/api/device?did=72ca9db90d31439dbf540c48b07abdb6",
+    },
 ]
 
 export default function NavLinks() {
@@ -19,7 +27,7 @@ export default function NavLinks() {
 
     return (
         <>
-            <div>
+            <div className="">
                 {links.map((link) => {
                     // const LinkIcon = link.icon
                     return (
@@ -27,7 +35,7 @@ export default function NavLinks() {
                             key={link.name}
                             href={link.href}
                             className={clsx(
-                                "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
+                                " flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 mb-2 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
                                 {
                                     "bg-sky-100 text-blue-600":
                                         pathname === link.href,
