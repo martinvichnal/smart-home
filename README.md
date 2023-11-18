@@ -1,10 +1,8 @@
-
 # Smart home system
 
 ![](https://img.shields.io/github/v/release/martinvichnal/smart-home)
 ![](https://img.shields.io/github/last-commit/martinvichnal/smart-home)
 ![](https://img.shields.io/github/issues/martinvichnal/smart-home)
-
 
 ---
 
@@ -16,62 +14,61 @@ This system is a dynamically changeable smart home system built with React TypeS
 -   _Feel free to **improve, use or fork** this repository in your own projects :)_
 -   _For any bugs or improvements feel free to make an [issue](https://github.com/martinvichnal/pomodoro/issues) or make a [pull request](https://github.com/martinvichnal/pomodoro/pulls)_
 
-
 ---
 
 # Table of Contents
 
-- [Smart home system](#smart-home-system)
-- [Introduction](#introduction)
-- [Table of Contents](#table-of-contents)
-- [Fundamental Operation](#fundamental-operation)
-   * [Diagram color code](#diagram-color-code)
-   * [System diagram](#system-diagram)
-   * [IoT device diagram](#iot-device-diagram)
-   * [Webapp diagram](#webapp-diagram)
-- [Software](#software)
-   * [Dataflow](#dataflow)
-   * [Webapp](#webapp)
-      + [Data Structures](#data-structures)
-   * [IoT Devices (Software of the ESP32)](#iot-devices-software-of-the-esp32)
-- [Acknowledgements / Source](#acknowledgements--source)
-
+-   [Smart home system](#smart-home-system)
+-   [Introduction](#introduction)
+-   [Table of Contents](#table-of-contents)
+-   [Fundamental Operation](#fundamental-operation)
+    -   [Diagram color code](#diagram-color-code)
+    -   [System diagram](#system-diagram)
+    -   [IoT device diagram](#iot-device-diagram)
+    -   [Webapp diagram](#webapp-diagram)
+-   [Software](#software)
+    -   [Dataflow](#dataflow)
+    -   [Webapp](#webapp)
+        -   [Data Structures](#data-structures)
+    -   [IoT Devices (Software of the ESP32)](#iot-devices-software-of-the-esp32)
+-   [Acknowledgements / Source](#acknowledgements--source)
 
 ---
 
 # Fundamental Operation
+
 This is the section for the basics of how it works and explaining through diagrams
 
-
 ## Diagram color code
+
 All the diagrams that are shown below are color coded with the following code rule:
 
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png)
 
-
 ## System diagram
+
 This is the basic system connection diagram.
 
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png)
 
-
 ## IoT device diagram
+
 This is the basic IoT devices diagram.
 
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png)
-
 
 ## Webapp diagram
 
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png)
 
-
 ---
 
 # Software
+
 In this project the software side is the main picture. The hardware side is just a simple group of wires to connect the sensors or extensions so I am basically focusing on the software side only.
 
 ## Dataflow
+
 Here is some basic sketch of how should the data flow from one platform to another
 
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png)
@@ -82,8 +79,8 @@ Here is some basic sketch of how should the data flow from one platform to anoth
 
 ---
 
-
 ### Data Structures
+
 Structure of the data communication example in JSON format:
 
 ```JSON
@@ -113,13 +110,13 @@ Structure of the data communication example in JSON format:
 
 ## IoT Devices (Software of the ESP32)
 
-
-
-
 ---
 
 # Acknowledgements / Source
- - [React](https://react.dev/learn)
- - [NextJS](https://nextjs.org/)
- - [Microsoft Azure](https://azure.microsoft.com/en-us/)
- - [PlatformIO](https://platformio.org/)
+
+-   [React](https://react.dev/learn)
+-   [NextJS](https://nextjs.org/)
+-   [Microsoft Azure](https://azure.microsoft.com/en-us/)
+-   [PlatformIO](https://platformio.org/)
+-   [NextJS Docker Example](https://github.com/vercel/next.js/tree/canary/examples/with-docker-multi-env)
+-   [MsSQL example](https://github.com/hohoaisan/simple-dockerized-nextjs-mssql)
