@@ -1,21 +1,15 @@
 #include <Arduino.h>
 #include <SmartHome.h>
+#include "credentials.h"
+
 
 void setup()
 {
 
   // Creating a new smarthome object
-  char[] deviceName = "Bedroom switch";
-  char[] deviceID = "d7b072ca90c48abdb9031436db9dbf54";
   SmartHome smartHome(deviceName, deviceID);
 
   // Setting server and WiFi credentials
-  char[] wifiSSID = "ssid";
-  char[] wifiPassword = "password";
-  char[] serverName = "server";
-  char[] serverLink = "serverLink";
-  int serverPort = 80;
-
   smarthome.setServer(serverLink, serverPort);
   smarthome.setCredentials("username", "password");
   smartHome.setWifi(wifiSSID, wifiPassword);

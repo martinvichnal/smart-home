@@ -23,26 +23,26 @@
 
 // Example data
 export const data = [
-    {
-        did: "72ca9db90d31439dbf540c48b07abdb6", // did: device id
-        dn: "Bedroom Lamp", // dn: device name
-        dd: "pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255",
-    },
-    {
-        did: "f33573d762614e47a0008659bb5de53e",
-        dn: "Bedroom Switcher Hub",
-        dd: "Power-b-true--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true",
-    },
-    {
-        did: "08659bb5de53e40c48b07ab90b25d29e4",
-        dn: "Kitchen Switcher Hub",
-        dd: "Power-b-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false",
-    },
-    {
-        did: "a550b29757374abda73c15d29e2cd1e1",
-        dn: "Smart Thermostat",
-        dd: "temperature-n-0-100-24.4--humidity-n-0-100-69.123--state-b-true--battery-n-0-100-24",
-    },
+    // {
+    //     did: "72ca9db90d31439dbf540c48b07abdb6", // did: device id
+    //     dn: "Bedroom Lamp", // dn: device name
+    //     dd: "pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255",
+    // },
+    // {
+    //     did: "f33573d762614e47a0008659bb5de53e",
+    //     dn: "Bedroom Switcher Hub",
+    //     dd: "Power-b-true--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true",
+    // },
+    // {
+    //     did: "08659bb5de53e40c48b07ab90b25d29e4",
+    //     dn: "Kitchen Switcher Hub",
+    //     dd: "Power-b-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false",
+    // },
+    // {
+    //     did: "a550b29757374abda73c15d29e2cd1e1",
+    //     dn: "Smart Thermostat",
+    //     dd: "temperature-n-0-100-24.4--humidity-n-0-100-69.123--state-b-true--battery-n-0-100-24",
+    // },
     {
         did: "89c44c3dbab948faa265ecd787743f15",
         dn: "Smart Door Lock",
