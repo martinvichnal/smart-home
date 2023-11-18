@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iot-mssql
+  labels:
+    app: iot
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - protocol: TCP
+    port: 1433
+    targetPort: 1433
+  selector:
+    app: iot
+  type: LoadBalancer
+  externalIPs:
+    - 38.242.236.7
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mssql-data
+  labels:
+    app: iot
+spec:
+  storageClassName: openebs-hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iot-mssql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iot
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: iot
+    spec:
+      terminationGracePeriodSeconds: 10
+      hostname: mssql
+      securityContext:
+        fsGroup: 1000
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/region
+                operator: In
+                values:
+                - eu
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - iot
+      containers:
+      - name: mssql
+        image: mcr.microsoft.com/mssql/server:2022-RTM-ubuntu-20.04
+        ports:
+        - containerPort: 1433
+        securityContext:
+          runAsUser: 0
+        env:
+        - name: MSSQL_PID
+          value: "Developer"
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mssql-secret
+              key: SA_PASSWORD 
+        volumeMounts:
+        - name: mssqldb
+          mountPath: /var/opt/mssql
+      volumes:
+      - name: mssqldb
+        persistentVolumeClaim:
+          claimName: mssql-data
