@@ -1,3 +1,4 @@
 
 smart-home-app/.env
 smart-home-firmware/include/credentials.h
+smart-home-app/.env.developement.sample
