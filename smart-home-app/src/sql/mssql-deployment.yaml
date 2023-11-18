@@ -1,22 +1,4 @@
 apiVersion: v1
-kind: Service
-metadata:
-  name: iot-mssql
-  labels:
-    app: iot
-spec:
-  externalTrafficPolicy: Cluster
-  ports:
-  - protocol: TCP
-    port: 1433
-    targetPort: 1433
-  selector:
-    app: iot
-  type: LoadBalancer
-  externalIPs:
-    - 38.242.236.7
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mssql-data
@@ -31,20 +13,20 @@ spec:
       storage: 20Gi
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: iot-mssql-deployment
+  name: iot-mssql
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: iot
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: iot
+      name:
+        iot-mssql
     spec:
       terminationGracePeriodSeconds: 10
       hostname: mssql
@@ -91,3 +73,21 @@ spec:
       - name: mssqldb
         persistentVolumeClaim:
           claimName: mssql-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iot-mssql
+  labels:
+    app: iot
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - protocol: TCP
+    port: 1433
+    targetPort: 1433
+  selector:
+    app: iot
+  type: LoadBalancer
+  externalIPs:
+    - 38.242.236.7
