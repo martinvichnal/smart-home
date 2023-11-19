@@ -1,0 +1,13 @@
+{
+    "private": true,
+    "name": "smart-home-server",
+    "description": "A smart home system, powered by WebSocket",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "start": "node ."
+    },
+    "dependencies": {
+        "ws": "^8.14.2"
+    }
+}

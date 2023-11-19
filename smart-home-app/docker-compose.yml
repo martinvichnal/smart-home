@@ -1,40 +1,44 @@
 # https://www.freecodecamp.org/news/how-to-enable-live-reload-on-docker-based-applications/
-version: "3"
+version: "3.8"
 services:
-    mssql:
-        container_name: mssql
-        hostname: mssql
-        build: ./mssql
+    ws:
+        container_name: ws_server
+        restart: on-failure
+        build:
+            context: .
+            dockerfile: server/Dockerfile
+        volumes:
+            - ./server:/app/server
         ports:
-            - 1433:1433
-        environment:
-            - ACCEPT_EULA=Y
-            - SA_PASSWORD=asd.QWE.123
-            - DATABASE_NAME=temp
-            - MSSQL_PID=Express
-        deploy:
-            resources:
-                limits:
-                    memory: 1024M
+            - "8080:8080"
+        command: >
+            sh -c "node ."
+
     nextjs:
         container_name: nextjs
-        build: ./nextjs
-        ports:
-            - 3000:3000
-        hostname: nodejs
-        # Run container as production mode by default, uncomment to enable dev mode (live reload enabled)
-        # command: yarn dev
-        environment:
-            - USER_NAME=sa
-            - PASSWORD=asd.QWE.123
-            - DATABASE_NAME=temp
-            - HOST_NAME=mssql
+        restart: on-failure
+        build: .
         volumes:
-            - ./nextjs:/src/
-            - nextjs_node_modules:/src/node_modules
-        links:
-            - mssql
+            - ./src:/app/src
+        ports:
+            - "3000:3000"
+        command: >
+            sh -c "npm start"
         depends_on:
-            - mssql
-volumes:
-    nextjs_node_modules: {}
+            - ws
+
+    # mssql:
+    #     container_name: mssql
+    #     hostname: mssql
+    #     build: ./mssql
+    #     ports:
+    #         - 1433:1433
+    #     environment:
+    #         - ACCEPT_EULA=Y
+    #         - SA_PASSWORD=asd.QWE.123
+    #         - DATABASE_NAME=temp
+    #         - MSSQL_PID=Express
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 memory: 1024M
