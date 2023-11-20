@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+    api-server:
+        build:
+            dockerfile: Dockerfile
+        ports:
+            - "5001:5001"

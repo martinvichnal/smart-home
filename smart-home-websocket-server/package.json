@@ -1,0 +1,22 @@
+{
+    "name": "smart-home-websocket-server",
+    "version": "1.0.0",
+    "description": "Backend WebSocket server for my smart-home system",
+    "main": "server.js",
+    "dependencies": {
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "express-async-handler": "^1.2.0",
+        "mssql": "^10.0.1",
+        "socket.io": "^4.7.2",
+        "ws": "^8.14.2"
+    },
+    "scripts": {
+        "start": "node ."
+    },
+    "directories": {
+        "doc": "doc"
+    },
+    "author": "Martin Vichnal",
+    "license": "MIT"
+}

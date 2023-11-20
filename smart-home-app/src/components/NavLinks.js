@@ -3,7 +3,6 @@
 import Link from "next/link"
 import clsx from "clsx"
 import { usePathname } from "next/navigation"
-import { signIn, signOut, useSession } from "next-auth/react"
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
@@ -23,7 +22,6 @@ const links = [
 
 export default function NavLinks() {
     const pathname = usePathname()
-    const { data: session } = useSession()
 
     return (
         <>
@@ -48,7 +46,7 @@ export default function NavLinks() {
                 })}
             </div>
             <div className="hidden h-auto w-full grow rounded-md bg-gray-100 md:block"></div>
-            <div>
+            {/* <div>
                 {session ? (
                     <button
                         className={clsx(
@@ -74,7 +72,7 @@ export default function NavLinks() {
                         Sign in
                     </button>
                 )}
-            </div>
+            </div> */}
         </>
     )
 }
