@@ -82,6 +82,7 @@ const createDevices = asyncHandler(async (req, res) => {
 const updateDevice = asyncHandler(async (req, res) => {
     const { did, dd } = req.body // Getting the data from the body
     const query = `UPDATE devices SET DD='${dd}' WHERE DID='${did}';`
+
     try {
         var request = new sql.Request()
         const result = await request.query(query)
