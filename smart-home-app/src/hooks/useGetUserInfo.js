@@ -6,7 +6,7 @@
  * @return  {Object}    Object with user info
  * @example const { uid, uName, uIsAuth } = useGetUserInfo()
  */
-export const useGetUserInfo = () => {
+export function useGetUserInfo() {
     let id, uid, uName, uEmail, uPhoto, uIsAuth
 
     if (typeof window !== "undefined") {
@@ -31,6 +31,7 @@ export const useGetUserInfo = () => {
         const prevUserData = JSON.parse(localStorage.getItem("auth") || "{}")
         const newUserData = { ...prevUserData, ...data }
         localStorage.setItem("auth", JSON.stringify(newUserData))
+        console.log("User data saved to local storage")
     }
 
     return {
