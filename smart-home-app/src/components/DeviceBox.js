@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 
-const DeviceBox = ({ device }) => {
+export default function DeviceBox({ device }) {
     const [values, setValues] = useState({})
 
     useEffect(() => {
@@ -104,5 +104,3 @@ const DeviceBox = ({ device }) => {
         </div>
     )
 }
-
-export default DeviceBox

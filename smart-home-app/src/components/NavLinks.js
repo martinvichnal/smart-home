@@ -3,45 +3,37 @@
 import Link from "next/link"
 import clsx from "clsx"
 import { redirect, usePathname } from "next/navigation"
-import { useGetUserInfo } from "@/hooks/useGetUserInfo"
-import { AuthSignInWithGoogle, AuthSignOut } from "@/components/AuthActions"
-import { useEffect, useState } from "react"
-import { revalidatePath } from "next/cache"
-
-const links = [
-    { name: "Home", href: "/" },
-    { name: "Devices", href: `/devices/${uid}` },
-    { name: "Testing", href: "/tester" },
-    { name: "Settings", href: "/" },
-    { name: "API / Users", href: "/api/auth" },
-    { name: "API / Device", href: "/api/device" },
-    {
-        name: "API / Device with ID",
-        href: "/api/device?did=72ca9db90d31439dbf540c48b07abdb6",
-    },
-]
+import { user } from "@/lib/placeholder-user"
+// import { useGetUserInfo } from "@/hooks/useGetUserInfo"
+// import { AuthSignOut } from "@/components/AuthActions"
 
 export default function NavLinks() {
-    const { uIsAuth, uName, uid } = useGetUserInfo()
-    const [name, setName] = useState()
-    const [loggedIn, setLoggedIn] = useState(false)
+    // const { uIsAuth, uName, uid } = useGetUserInfo()
     const pathname = usePathname()
 
-    useEffect(() => {
-        setName(uName)
-        setLoggedIn(uIsAuth)
-    }, [])
+    const links = [
+        { name: "Home", href: "/" },
+        { name: "Devices", href: `/devices/${user.uid}` },
+        { name: "Testing", href: "/tester" },
+        { name: "Settings", href: "/" },
+        { name: "API / Users", href: "/api/auth" },
+        { name: "API / Device", href: "/api/device" },
+        {
+            name: "API / Device with ID",
+            href: "/api/device?did=72ca9db90d31439dbf540c48b07abdb6",
+        },
+    ]
 
-    const signOutAction = () => {
-        console.log("Signing out action triggered")
-        AuthSignOut()
-        return redirect(`/`)
-    }
+    // const signOutAction = () => {
+    //     console.log("Signing out action triggered")
+    //     AuthSignOut()
+    //     return redirect(`/`)
+    // }
 
-    const signInAction = () => {
-        console.log("redirecting to auth")
-        redirect(`/auth`)
-    }
+    // const signInAction = () => {
+    //     console.log("redirecting to auth")
+    //     redirect(`/auth`)
+    // }
 
     return (
         <>
@@ -67,9 +59,9 @@ export default function NavLinks() {
             </div>
             <div className="hidden h-auto w-full grow rounded-md bg-gray-100 md:block"></div>
             <div>
-                {loggedIn ? (
+                {user.uIsAuth ? (
                     <div>
-                        <p>You are logged in as: {name}</p>
+                        <p>You are logged in as: {user.uName}</p>
                         <button
                             className={clsx(
                                 "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
@@ -77,7 +69,7 @@ export default function NavLinks() {
                                     "bg-sky-100 text-blue-600": true,
                                 }
                             )}
-                            onClick={() => signOutAction()}
+                            // onClick={() => signOutAction()}
                         >
                             Sign out
                         </button>
@@ -92,7 +84,7 @@ export default function NavLinks() {
                                     "bg-sky-100 text-blue-600": false,
                                 }
                             )}
-                            onClick={() => redirect(`/auth`)}
+                            // onClick={() => redirect(`/auth`)}
                         >
                             Sign in
                         </button>
