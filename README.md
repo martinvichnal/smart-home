@@ -79,6 +79,44 @@ Here is some basic sketch of how should the data flow from one platform to anoth
 
 ---
 
+### API
+```TS
+Awailable APIs:
+
+DEVICES:
+// Get all devices
+- GET {server}/api/device/getDevice 
+return JSON: all devices
+
+// Get specific device by device ID
+- GET {server}/api/device/getDevice?did={deviceID} 
+return JSON: specific device by deviceID
+
+// Get all devices by user ID
+- GET {server}/api/device/getDevice?uid={userID} 
+return JSON: specific device by userID
+
+// Add new device
+- POST {server}/api/device/addDevice 
+body: {did, dn, dd, uid}
+return JSON: OK
+
+// Update device data by device ID
+- POST {server}/api/device/setDevice
+body: {did, dd}
+return JSON: OK
+
+// Delete device by device ID
+- POST {server}/api/device/deleteDevice
+body: {did}
+return JSON: OK
+
+USERS:
+// Get all users
+- GET {server}/api/user/getUser
+return JSON: all users
+```
+
 ### Data Structures
 
 Structure of the data communication example in JSON format:
