@@ -7,7 +7,7 @@ import { useGetUserInfo } from "@/hooks/useGetUserInfo"
 import { AuthSignInWithGoogle, AuthSignOut } from "@/components/AuthActions"
 import { useEffect, useState } from "react"
 import { revalidatePath } from "next/cache"
-const { uIsAuth, uName, uid } = useGetUserInfo()
+
 const links = [
     { name: "Home", href: "/" },
     { name: "Devices", href: `/devices/${uid}` },
@@ -22,6 +22,7 @@ const links = [
 ]
 
 export default function NavLinks() {
+    const { uIsAuth, uName, uid } = useGetUserInfo()
     const [name, setName] = useState()
     const [loggedIn, setLoggedIn] = useState(false)
     const pathname = usePathname()

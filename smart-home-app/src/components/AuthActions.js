@@ -2,9 +2,9 @@ import { auth, provider } from "../config/firebase-config"
 import { signInWithPopup } from "firebase/auth"
 import { revalidatePath } from "next/cache"
 import { useGetUserInfo } from "../hooks/useGetUserInfo"
-const { setUserDataToLocalStorage } = useGetUserInfo()
 
 export async function AuthSignInWithGoogle() {
+    const { setUserDataToLocalStorage } = useGetUserInfo()
     try {
         const result = await signInWithPopup(auth, provider)
         console.log("Signed in with Google")
@@ -22,6 +22,7 @@ export async function AuthSignInWithGoogle() {
 }
 
 export async function AuthSignOut() {
+    const { setUserDataToLocalStorage } = useGetUserInfo()
     try {
         auth.signOut()
         console.log("Signed Out with Google")
