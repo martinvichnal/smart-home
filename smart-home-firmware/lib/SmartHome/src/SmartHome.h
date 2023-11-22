@@ -14,6 +14,8 @@
 
 #include <Arduino.h>
 #include <HTTPClient.h>
+#include <Arduino_JSON.h> 
+#include "config.h"
 #include <vector>
 #include <algorithm>
 
@@ -43,25 +45,30 @@ private:
 
 class SmartHome {
 public:
-    SmartHome(const String& deviceName, const String& deviceID);
+    SmartHome(const String& homeName, const String& homeID);
+
+    String getHomeID() const;
+    String getHomeName() const;
 
     void addVariableNumber(int pin, const String& name, int minValue, int maxValue, int value);
     void addVariableBool(int pin, const String& name, int value);
 
     void setVariableValue(const String& name, int value);
+    void setVariableValue(const String& variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue);
 
     void push();
     void update(int interval);
 
 private:
-    String deviceName;
-    String deviceID;
+    String homeName;
+    String homeID;
     std::vector<Variable> variables;
     unsigned long previousMillis = 0;
 
     void sendToServer(const String& data);
     String fetchDataFromServer();
     void processReceivedData(const String& data);
+
 };
 
 #endif

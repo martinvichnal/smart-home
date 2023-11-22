@@ -14,6 +14,7 @@
  */
 
 #include "SmartHome.h"
+#include <Arduino_JSON.h>
 
 
 /*
@@ -110,8 +111,24 @@ void Variable::setValue(int newValue) {
                                                                                                         
                                                                 
 */                                                                
-SmartHome::SmartHome(const String& deviceName, const String& deviceID)
-  : deviceName(deviceName), deviceID(deviceID) {}
+SmartHome::SmartHome(const String& homeName, const String& homeID)
+  : homeName(homeName), homeID(homeID) {}
+
+/**
+ * @brief Getting home ID
+ * @return String 
+ */
+String SmartHome::getHomeID() const {
+    return homeID;
+}
+
+/**
+ * @brief Getting home name
+ * @return String 
+ */
+String SmartHome::getHomeName() const {
+    return homeName;
+}
 
 /**
  * @brief Adding new NUMBER variable to the SmartHome class
@@ -140,16 +157,16 @@ void SmartHome::addVariableBool(int pin, const String& name, int value) {
  * @param name 
  * @param value 
  */
-void SmartHome::setVariableValue(const String& name, int value) {
+void SmartHome::setVariableValue(const String& variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue) {
     auto variableIt = std::find_if(
         variables.begin(), variables.end(),
-        [name](const Variable& variable) { return variable.getName() == name; });
+        [variableName](const Variable& variable) { return variable.getName() == variableName; });
 
     if (variableIt != variables.end()) {
         // Update the value of the found variable
-        variableIt->setValue(value);
+        variableIt->setValue(variableValue);
     } else {
-        Serial.println("Variable not found!");
+        Serial.println("Variable not found: " + variableName);
     }
 }
 
@@ -191,7 +208,7 @@ void SmartHome::sendToServer(const String& data) {
     http.begin("");
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    String payload = "deviceID=" + deviceID + "&data=" + data;
+    String payload = "homeID=" + homeID + "&data=" + data;
 
     int httpResponseCode = http.POST(payload);
     if (httpResponseCode > 0) {
@@ -211,7 +228,10 @@ void SmartHome::sendToServer(const String& data) {
 String SmartHome::fetchDataFromServer() {
     // Implement HTTP GET request
     HTTPClient http;
-    http.begin("" + deviceID);
+    String serverUrl = "https://smart-home-green.vercel.app/api/db/device";
+    String ID = getHomeID();
+    String query = serverUrl + "?did=" + ID;
+    http.begin(query);
 
     int httpResponseCode = http.GET();
     if (httpResponseCode == HTTP_CODE_OK) {
@@ -234,6 +254,5 @@ String SmartHome::fetchDataFromServer() {
  * @param data 
  */
 void SmartHome::processReceivedData(const String& data) {
-    // Implement logic to process received data
-    // Example: Parse the data and update variables
+    ...
 }

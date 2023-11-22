@@ -1,0 +1,8 @@
+{
+    "name": "SmartHome",
+    "version": "1.0.0",
+    "description": "Custom ESP32 library for my SmartHome project",
+    "dependencies": {
+        "Arduino_JSON": "https://github.com/arduino-libraries/Arduino_JSON"
+    }
+}
