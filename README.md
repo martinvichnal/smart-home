@@ -29,6 +29,7 @@ This system is a dynamically changeable smart home system built with React TypeS
 -   [Software](#software)
     -   [Dataflow](#dataflow)
     -   [Webapp](#webapp)
+        -   [API](#api)
         -   [Data Structures](#data-structures)
     -   [IoT Devices (Software of the ESP32)](#iot-devices-software-of-the-esp32)
 -   [Acknowledgements / Source](#acknowledgements--source)
@@ -80,41 +81,90 @@ Here is some basic sketch of how should the data flow from one platform to anoth
 ---
 
 ### API
-```TS
+
 Awailable APIs:
 
 DEVICES:
-// Get all devices
-- GET {server}/api/device/getDevice 
-return JSON: all devices
 
-// Get specific device by device ID
-- GET {server}/api/device/getDevice?did={deviceID} 
-return JSON: specific device by deviceID
+```JavaScript
+/**
+ * @description Get a device from the database by ID or by user ID
+ * @method GET
+ * @API /api/db/device
+ * @API /api/db/device?did={did}
+ * @API /api/db/device?uid={uid}
+ * @body -
+ * @returns {JSON} result
+ */
+export async function GET(request)
 
-// Get all devices by user ID
-- GET {server}/api/device/getDevice?uid={userID} 
-return JSON: specific device by userID
+/**
+ * @description Update device data in the database by ID
+ * @method PUT
+ * @API /api/db/device
+ * @body {JSON} {did, dd}
+ * @returns {JSON} result
+ */
+export async function PUT(request)
 
-// Add new device
-- POST {server}/api/device/addDevice 
-body: {did, dn, dd, uid}
-return JSON: OK
+/**
+ * @description Add (insert) a device to the database
+ * @method POST
+ * @API /api/db/device
+ * @body {JSON} {did, dn, dd, uid}
+ * @returns {JSON} result
+ */
+export async function POST(request)
 
-// Update device data by device ID
-- POST {server}/api/device/setDevice
-body: {did, dd}
-return JSON: OK
-
-// Delete device by device ID
-- POST {server}/api/device/deleteDevice
-body: {did}
-return JSON: OK
+/**
+ * @description Delete a device from the database by ID
+ * @method DELETE
+ * @API /api/db/device
+ * @body {JSON} {did}
+ * @returns {JSON} result
+ */
+export async function DELETE(request)
+```
 
 USERS:
-// Get all users
-- GET {server}/api/user/getUser
-return JSON: all users
+
+```JavaScript
+/**
+ * @description Get all user from the database or by ID
+ * @method GET
+ * @API /api/db/user
+ * @API /api/db/user?uid={uid}
+ * @body -
+ * @returns {JSON} result
+ */
+export async function GET(request)
+
+/**
+ * @description Update user data in the database by ID
+ * @method PUT
+ * @API /api/db/user
+ * @body {JSON} {uid}
+ * @returns {JSON} result
+ */
+export async function PUT(request)
+
+/**
+ * @description Add (insert) a user to the database
+ * @method POST
+ * @API /api/db/user
+ * @body {JSON} {uid}
+ * @returns {JSON} result
+ */
+export async function POST(request)
+
+/**
+ * @description Delete a user from the database by ID
+ * @method DELETE
+ * @API /api/db/user
+ * @body {JSON} {uid}
+ * @returns {JSON} result
+ */
+export async function DELETE(request)
 ```
 
 ### Data Structures
@@ -155,6 +205,7 @@ Structure of the data communication example in JSON format:
 -   [React](https://react.dev/learn)
 -   [NextJS](https://nextjs.org/)
 -   [Microsoft Azure](https://azure.microsoft.com/en-us/)
--   [PlatformIO](https://platformio.org/)
 -   [NextJS Docker Example](https://github.com/vercel/next.js/tree/canary/examples/with-docker-multi-env)
 -   [MsSQL example](https://github.com/hohoaisan/simple-dockerized-nextjs-mssql)
+-   [API Guidelines](https://github.com/microsoft/api-guidelines)
+-   [PlatformIO](https://platformio.org/)
