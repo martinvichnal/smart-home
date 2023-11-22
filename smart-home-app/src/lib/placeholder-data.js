@@ -26,7 +26,7 @@ export const data = [
     {
         did: "72ca9db90d31439dbf540c48b07abdb6", // did: device id
         dn: "Bedroom Lamp", // dn: device name
-        dd: "pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255",
+        dd: "pot-n-0-255-123--state-b-false--battery-n-0-100-50--brightness-n-0-100-60--hue-n-0-255-46",
     },
     {
         did: "f33573d762614e47a0008659bb5de53e",

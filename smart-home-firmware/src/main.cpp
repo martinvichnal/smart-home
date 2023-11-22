@@ -1,3 +1,15 @@
+/**
+ * @file main.cpp
+ * @author Martin Vichnál
+ * @page https://github.com/martinvichnal/smart-home
+ * @brief ESP32 firmware for my SmartHome project using my custom library
+ * @version v1.0.0
+ * @date 2023-11-22
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -5,60 +17,41 @@
 #include <SmartHome.h>
 #include "config.h"
 
+// Creating a new smarthome object
+SmartHome smartHome("TestHome", "89c44c3dbab948faa265ecd787743f15");
+
 // Fucntions
 void connectToWifi();
-String httpGETRequest(const char* serverName);
 
 // Global variables
 
-const char * serverName = "https://jsonplaceholder.typicode.com/users";
+int temp = 24;
+int hum = 69;
+bool light = false;
+bool led = true;
 
 // SETUP
 void setup()
 {
   Serial.begin(115200);
   delay(1000);
-  connectToWifi();
-  // Creating a new smarthome object
-  // SmartHome smartHome(deviceName, deviceID);
-
-  // Setting server and WiFi credentials
-  // smarthome.setServer(serverLink, serverPort);
-  // smarthome.setCredentials("username", "password");
-  // smartHome.setWifi(wifiSSID, wifiPassword);
-
-  // Setting Variables along with their types and limits
-  // Types: n - number, b - boolean
-  // Limits: for numbers - min, max, for boolean - none
-  // smartHome.addVariableNumber("temperature", n, 0, 100);
-  // smartHome.addVariableNumber("humidity", n, 0, 100);
-  // smartHome.addVariableBool("light", b);
-  // smartHome.addVariableBool("led", b);
-
+  // connectToWifi();
+  
+  // Add variables to my smartHome
+  smartHome.addVariableNumber(13, "temperature", 0, 100, temp);
+  smartHome.addVariableNumber(14, "humidity", 0, 100, hum);
+  smartHome.addVariableBool(15, "light", light);
+  smartHome.addVariableBool(16, "led", led);
 }
-
-String sensorReadings;
-
 void loop()
 {
-  // DO STUFF HERE
-
-  // Update the smarthome variables and sending to server
-  // smartHome.update();
-  // smartHome.push();
-  sensorReadings = httpGETRequest(serverName);
-  Serial.println(sensorReadings);
-  JSONVar myObject = JSON.parse(sensorReadings);
-  
-  // JSON.typeof(jsonVar) can be used to get the type of the var
-  if (JSON.typeof(myObject) == "undefined") {
-    Serial.println("Parsing input failed!");
-    return;
-  }
-    
-  Serial.print("JSON object = ");
-  Serial.println(myObject);
-  delay(5000);  
+  smartHome.setVariableValue("temperature", temp);
+  smartHome.setVariableValue("humidity", hum);
+  temp++;
+  hum++;
+  delay(5000);
+  smartHome.push();
+  // smartHome.update(20000);
 }
 
 
@@ -76,33 +69,4 @@ void connectToWifi()
     Serial.println("\nConnected to the WiFi network");
     Serial.print("Local ESP32 IP: ");
     Serial.println(WiFi.localIP());
-}
-
-
-// char* postData = "key1=value1&key2=value2";
-String httpGETRequest(const char* serverName) {
-  WiFiClient client;
-  HTTPClient http;
-    
-  // Your Domain name with URL path or IP address with path
-  http.begin(client, serverName);
-
-  // Send HTTP POST request
-  int httpResponseCode = http.GET();
-  
-  String payload = "{}"; 
-  
-  if (httpResponseCode>0) {
-    Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
-    payload = http.getString();
-  }
-  else {
-    Serial.print("Error code: ");
-    Serial.println(httpResponseCode);
-  }
-  // Free resources
-  http.end();
-
-  return payload;
 }
