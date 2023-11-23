@@ -5,23 +5,21 @@
  * @brief Custom ESP32 library for my SmartHome project
  * @version v1.0.0
  * @date 2023-11-22
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  * @note This library is not finished yet
  * @todo Implement HTTP GET and POST requests
  * @todo Implement validation check for maximum and minimum values and types
  */
 
 #include "SmartHome.h"
-#include <Arduino_JSON.h>
-
 
 /*
 
- /$$    /$$                    /$$           /$$       /$$          
-| $$   | $$                   |__/          | $$      | $$          
-| $$   | $$ /$$$$$$   /$$$$$$  /$$  /$$$$$$ | $$$$$$$ | $$  /$$$$$$ 
+ /$$    /$$                    /$$           /$$       /$$
+| $$   | $$                   |__/          | $$      | $$
+| $$   | $$ /$$$$$$   /$$$$$$  /$$  /$$$$$$ | $$$$$$$ | $$  /$$$$$$
 |  $$ / $$/|____  $$ /$$__  $$| $$ |____  $$| $$__  $$| $$ /$$__  $$
  \  $$ $$/  /$$$$$$$| $$  \__/| $$  /$$$$$$$| $$  \ $$| $$| $$$$$$$$
   \  $$$/  /$$__  $$| $$      | $$ /$$__  $$| $$  | $$| $$| $$_____/
@@ -29,143 +27,168 @@
     \_/    \_______/|__/      |__/ \_______/|_______/ |__/ \_______/
 
 */
-Variable::Variable(int pin, const String& name, char type, int minValue, int maxValue, int value)
+Variable::Variable(int pin, const String &name, char type, int minValue, int maxValue, int value)
     : pin(pin), name(name), type(type), minValue(minValue), maxValue(maxValue), value(value) {}
 
 /**
  * @brief Stringify the variable to send to the database
- * @return String 
+ * @return String
  */
-String Variable::toString() const {
+String Variable::toString() const
+{
     return name + "-" + type + "-" + String(minValue) + "-" + String(maxValue) + "-" + String(value);
 }
 
 /**
  * @brief Getting variable pin number
- * @return int 
+ * @return int
  */
-int Variable::getPin() const {
+int Variable::getPin() const
+{
     return pin;
 }
 
 /**
  * @brief Getting variable name
- * @return String 
+ * @return String
  */
-String Variable::getName() const {
+String Variable::getName() const
+{
     return name;
 }
 
 /**
  * @brief Getting variable type
- * @return char 
+ * @return char
  */
-char Variable::getType() const {
+char Variable::getType() const
+{
     return type;
 }
 
 /**
  * @brief Getting variable minimum value
- * @return int 
+ * @return int
  */
-int Variable::getMinValue() const {
+int Variable::getMinValue() const
+{
     return minValue;
 }
 
 /**
  * @brief Getting variable maximum value
- * @return int 
+ * @return int
  */
-int Variable::getMaxValue() const {
+int Variable::getMaxValue() const
+{
     return maxValue;
 }
 
 /**
  * @brief Getting variable value
- * @return int 
+ * @return int
  */
-int Variable::getValue() const {
+int Variable::getValue() const
+{
     return value;
 }
 
 /**
  * @brief Setting variable value
  * @todo Add validation for other types
- * @param newValue 
+ * @param newValue
  */
-void Variable::setValue(int newValue) {
-  value = newValue;
+void Variable::setValue(int newValue)
+{
+    value = newValue;
 }
-
 
 /*
 
-  /$$$$$$                                      /$$           /$$   /$$                                  
- /$$__  $$                                    | $$          | $$  | $$                                  
-| $$  \__/ /$$$$$$/$$$$   /$$$$$$   /$$$$$$  /$$$$$$        | $$  | $$  /$$$$$$  /$$$$$$/$$$$   /$$$$$$ 
+  /$$$$$$                                      /$$           /$$   /$$
+ /$$__  $$                                    | $$          | $$  | $$
+| $$  \__/ /$$$$$$/$$$$   /$$$$$$   /$$$$$$  /$$$$$$        | $$  | $$  /$$$$$$  /$$$$$$/$$$$   /$$$$$$
 |  $$$$$$ | $$_  $$_  $$ |____  $$ /$$__  $$|_  $$_/        | $$$$$$$$ /$$__  $$| $$_  $$_  $$ /$$__  $$
  \____  $$| $$ \ $$ \ $$  /$$$$$$$| $$  \__/  | $$          | $$__  $$| $$  \ $$| $$ \ $$ \ $$| $$$$$$$$
  /$$  \ $$| $$ | $$ | $$ /$$__  $$| $$        | $$ /$$      | $$  | $$| $$  | $$| $$ | $$ | $$| $$_____/
 |  $$$$$$/| $$ | $$ | $$|  $$$$$$$| $$        |  $$$$/      | $$  | $$|  $$$$$$/| $$ | $$ | $$|  $$$$$$$
  \______/ |__/ |__/ |__/ \_______/|__/         \___/        |__/  |__/ \______/ |__/ |__/ |__/ \_______/
-                                                                                                        
-                                                                
-*/                                                                
-SmartHome::SmartHome(const String& homeName, const String& homeID)
-  : homeName(homeName), homeID(homeID) {}
+
+
+*/
+SmartHome::SmartHome(const String &homeName, const String &homeID, const String &serverUrl)
+    : homeName(homeName), homeID(homeID), serverUrl(serverUrl) {}
 
 /**
  * @brief Getting home ID
- * @return String 
+ * @return String
  */
-String SmartHome::getHomeID() const {
+String SmartHome::getHomeID() const
+{
     return homeID;
 }
 
 /**
  * @brief Getting home name
- * @return String 
+ * @return String
  */
-String SmartHome::getHomeName() const {
+String SmartHome::getHomeName() const
+{
     return homeName;
 }
 
 /**
- * @brief Adding new NUMBER variable to the SmartHome class
- * @param pin 
- * @param name 
- * @param minValue 
- * @param maxValue 
- * @param value 
+ * @brief Getting serverUrl where the API is fetched from
+ * @return String
  */
-void SmartHome::addVariableNumber(int pin, const String& name, int minValue, int maxValue, int value) {
+String SmartHome::getServerUrl() const
+{
+    return serverUrl;
+}
+
+/**
+ * @brief Adding new NUMBER variable to the SmartHome class
+ * @param pin
+ * @param name
+ * @param minValue
+ * @param maxValue
+ * @param value
+ */
+void SmartHome::addVariableNumber(int pin, const String &name, int minValue, int maxValue, int value)
+{
     variables.push_back(Variable(pin, name, 'n', minValue, maxValue, value));
 }
 
 /**
  * @brief Adding new BOOLEAN variable to the SmartHome class
- * @param pin 
- * @param name 
- * @param value 
+ * @param pin
+ * @param name
+ * @param value
  */
-void SmartHome::addVariableBool(int pin, const String& name, int value) {
+void SmartHome::addVariableBool(int pin, const String &name, int value)
+{
     variables.push_back(Variable(pin, name, 'b', 0, 0, value));
 }
 
 /**
  * @brief Setting variable value by name
- * @param name 
- * @param value 
+ * @param name
+ * @param value
  */
-void SmartHome::setVariableValue(const String& variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue) {
+void SmartHome::setVariableValue(const String &variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue)
+{
     auto variableIt = std::find_if(
         variables.begin(), variables.end(),
-        [variableName](const Variable& variable) { return variable.getName() == variableName; });
+        [variableName](const Variable &variable)
+        { return variable.getName() == variableName; });
 
-    if (variableIt != variables.end()) {
+    if (variableIt != variables.end())
+    {
         // Update the value of the found variable
         variableIt->setValue(variableValue);
-    } else {
+    }
+    else
+    {
         Serial.println("Variable not found: " + variableName);
     }
 }
@@ -173,9 +196,11 @@ void SmartHome::setVariableValue(const String& variableName, char variableType, 
 /**
  * @brief Pushing data to the server
  */
-void SmartHome::push() {
+void SmartHome::push()
+{
     String data;
-    for (const auto& variable : variables) {
+    for (const auto &variable : variables)
+    {
         data += variable.toString() + "--";
     }
     Serial.print("Sending data to server: ");
@@ -187,9 +212,11 @@ void SmartHome::push() {
  * @brief Updating data from the server within a specific interval (in milliseconds) (not implemented yet)
  * @param interval in ms
  */
-void SmartHome::update(int interval) {
+void SmartHome::update(int interval)
+{
     unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval) {
+    if (currentMillis - previousMillis >= interval)
+    {
         String receivedData = fetchDataFromServer();
         processReceivedData(receivedData);
 
@@ -200,9 +227,10 @@ void SmartHome::update(int interval) {
 /**
  * @brief Sending data to the server with HTTP API POST request (not implemented yet)
  * @todo Implement HTTP POST request
- * @param data 
+ * @param data
  */
-void SmartHome::sendToServer(const String& data) {
+void SmartHome::sendToServer(const String &data)
+{
     // Implement HTTP POST request
     HTTPClient http;
     http.begin("");
@@ -211,9 +239,12 @@ void SmartHome::sendToServer(const String& data) {
     String payload = "homeID=" + homeID + "&data=" + data;
 
     int httpResponseCode = http.POST(payload);
-    if (httpResponseCode > 0) {
+    if (httpResponseCode > 0)
+    {
         Serial.printf("HTTP POST success, response code: %d\n", httpResponseCode);
-    } else {
+    }
+    else
+    {
         Serial.printf("HTTP POST failed, response code: %d\n", httpResponseCode);
     }
 
@@ -223,22 +254,23 @@ void SmartHome::sendToServer(const String& data) {
 /**
  * @brief Fetching data from the server with HTTP API GET request (not implemented yet)
  * @todo Implement HTTP GET request
- * @return String 
+ * @return String
  */
-String SmartHome::fetchDataFromServer() {
+String SmartHome::fetchDataFromServer()
+{
     // Implement HTTP GET request
     HTTPClient http;
-    String serverUrl = "https://smart-home-green.vercel.app/api/db/device";
-    String ID = getHomeID();
-    String query = serverUrl + "?did=" + ID;
-    http.begin(query);
+    http.begin(getServerUrl() + "?did=" + getHomeID());
 
     int httpResponseCode = http.GET();
-    if (httpResponseCode == HTTP_CODE_OK) {
+    if (httpResponseCode == HTTP_CODE_OK)
+    {
         String response = http.getString();
         Serial.printf("HTTP GET success, response: %s\n", response.c_str());
         return response;
-    } else {
+    }
+    else
+    {
         Serial.printf("HTTP GET failed, response code: %d\n", httpResponseCode);
         return "";
     }
@@ -248,11 +280,41 @@ String SmartHome::fetchDataFromServer() {
 
 /**
  * @brief Processing received data from the server (not implemented yet)
- * @todo Implement logic to process received data
- * @todo Parse the data and update variables
- * @todo Validation check
- * @param data 
+ * @todo Process device data into their corresponding variables
+ * @param data
  */
-void SmartHome::processReceivedData(const String& data) {
-    ...
+void SmartHome::processReceivedData(const String &data)
+{
+    DynamicJsonDocument jsonData(1024);
+    DeserializationError error = deserializeJson(jsonData, data);
+
+    if (error == DeserializationError::Ok)
+    {
+        if (jsonData.is<JsonArray>())
+        {
+            JsonArray devices = jsonData.as<JsonArray>();
+            for (const auto &device : devices)
+            {
+                String deviceId = device["DID"].as<String>();
+                String deviceName = device["DN"].as<String>();
+                String deviceData = device["DD"].as<String>();
+                String userId = device["UID"].as<String>();
+
+                Serial.println("Device ID: " + deviceId);
+                Serial.println("Device name: " + deviceName);
+                Serial.println("Device data: " + deviceData);
+                Serial.println("User ID: " + userId);
+
+                // TODO: process device data into their corresponding variables
+            }
+        }
+        else
+        {
+            Serial.println("Invalid JSON format");
+        }
+    }
+    else
+    {
+        Serial.println("Deserialization error: " + String(error.c_str()));
+    }
 }

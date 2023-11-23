@@ -5,23 +5,24 @@
  * @brief Custom ESP32 library for my SmartHome project
  * @version v1.0.0
  * @date 2023-11-22
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #ifndef SmartHome_h
 #define SmartHome_h
 
 #include <Arduino.h>
 #include <HTTPClient.h>
-#include <Arduino_JSON.h> 
+#include <ArduinoJson.h>
 #include "config.h"
 #include <vector>
 #include <algorithm>
 
-class Variable {
+class Variable
+{
 public:
-    Variable(int pin, const String& name, char type, int minValue, int maxValue, int value);
+    Variable(int pin, const String &name, char type, int minValue, int maxValue, int value);
 
     String toString() const;
 
@@ -43,18 +44,20 @@ private:
     int value;
 };
 
-class SmartHome {
+class SmartHome
+{
 public:
-    SmartHome(const String& homeName, const String& homeID);
+    SmartHome(const String &homeName, const String &homeID, const String &serverUrl);
 
     String getHomeID() const;
     String getHomeName() const;
+    String getServerUrl() const;
 
-    void addVariableNumber(int pin, const String& name, int minValue, int maxValue, int value);
-    void addVariableBool(int pin, const String& name, int value);
+    void addVariableNumber(int pin, const String &name, int minValue, int maxValue, int value);
+    void addVariableBool(int pin, const String &name, int value);
 
-    void setVariableValue(const String& name, int value);
-    void setVariableValue(const String& variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue);
+    void setVariableValue(const String &name, int value);
+    void setVariableValue(const String &variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue);
 
     void push();
     void update(int interval);
@@ -62,13 +65,13 @@ public:
 private:
     String homeName;
     String homeID;
+    String serverUrl;
     std::vector<Variable> variables;
     unsigned long previousMillis = 0;
 
-    void sendToServer(const String& data);
+    void sendToServer(const String &data);
     String fetchDataFromServer();
-    void processReceivedData(const String& data);
-
+    void processReceivedData(const String &data);
 };
 
 #endif

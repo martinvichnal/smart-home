@@ -5,21 +5,21 @@
  * @brief ESP32 firmware for my SmartHome project using my custom library
  * @version v1.0.0
  * @date 2023-11-22
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 
 #include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 // #include <Arduino_JSON.h>
-#include "SmartHome.h"
+#include <SmartHome.h>
 #include "config.h"
 
 // Creating a new smarthome object
-SmartHome smartDoorLock("Smart Door Lock", "89c44c3dbab948faa265ecd787743f15");
-SmartHome bedRoomLamp("Bedroom Lamp", "72ca9db90d31439dbf540c48b07abdb6");
+SmartHome smartDoorLock("Smart Door Lock", "89c44c3dbab948faa265ecd787743f15", url);
+// SmartHome bedRoomLamp("Bedroom Lamp", "72ca9db90d31439dbf540c48b07abdb6");
 
 // Fucntions
 void connectToWifi();
@@ -39,7 +39,7 @@ void setup()
   Serial.begin(115200);
   delay(1000);
   connectToWifi();
-  
+
   // Add variables to my smartHome
   // smartHome.addVariableNumber(13, "temperature", 0, 100, temp);
   // smartHome.addVariableNumber(14, "humidity", 0, 100, hum);
@@ -51,29 +51,24 @@ void loop()
 {
   // smartHome.setVariableValue("temperature", temp);
   // smartHome.setVariableValue("humidity", hum);
-  // temp++;
-  // hum++;
-  // delay(5000);
-  // smartHome.push();
-  // // smartHome.update(20000);
-  smartDoorLock.update(10000);
-  bedRoomLamp.update(20000);
-  // delay(30000);
-}
 
+  smartDoorLock.update(10000);
+  // bedRoomLamp.update(20000);
+}
 
 void connectToWifi()
 {
-    WiFi.mode(WIFI_STA); //Optional
-    WiFi.begin(ssid, password);
-    Serial.println("\nConnecting");
+  WiFi.mode(WIFI_STA); // Optional
+  WiFi.begin(ssid, password);
+  Serial.println("\nConnecting");
 
-    while(WiFi.status() != WL_CONNECTED){
-        Serial.print(".");
-        delay(100);
-    }
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(100);
+  }
 
-    Serial.println("\nConnected to the WiFi network");
-    Serial.print("Local ESP32 IP: ");
-    Serial.println(WiFi.localIP());
+  Serial.println("\nConnected to the WiFi network");
+  Serial.print("Local ESP32 IP: ");
+  Serial.println(WiFi.localIP());
 }
