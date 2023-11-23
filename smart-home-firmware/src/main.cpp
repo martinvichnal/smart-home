@@ -17,6 +17,7 @@
 #include <SmartHome.h>
 #include "config.h"
 
+String url = "https://smart-home-green.vercel.app/api/db/device";
 // Creating a new smarthome object
 SmartHome smartDoorLock("Smart Door Lock", "89c44c3dbab948faa265ecd787743f15", url);
 // SmartHome bedRoomLamp("Bedroom Lamp", "72ca9db90d31439dbf540c48b07abdb6");
@@ -27,11 +28,8 @@ void connectToWifi();
 // void processReceivedData(const String& data);
 
 // Global variables
-
-int temp = 24;
-int hum = 69;
-bool light = false;
-bool led = true;
+int battery = 0;
+bool locked = 0;
 
 // SETUP
 void setup()
@@ -45,15 +43,20 @@ void setup()
   // smartHome.addVariableNumber(14, "humidity", 0, 100, hum);
   // smartHome.addVariableBool(15, "light", light);
   // smartHome.addVariableBool(16, "led", led);
+  smartDoorLock.addVariableNumber(16, "battery", 0, 100, battery);
+  smartDoorLock.addVariableBool(15, "locked", locked);
 }
 
 void loop()
 {
-  // smartHome.setVariableValue("temperature", temp);
-  // smartHome.setVariableValue("humidity", hum);
-
-  smartDoorLock.update(10000);
   // bedRoomLamp.update(20000);
+  smartDoorLock.update(1);
+  battery += 24;
+  locked += 1;
+  smartDoorLock.setVariableValue("battery", battery);
+  smartDoorLock.setVariableValue("locked", locked);
+  delay(10000);
+  smartDoorLock.push();
 }
 
 void connectToWifi()

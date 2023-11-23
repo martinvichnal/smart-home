@@ -175,6 +175,33 @@ void SmartHome::addVariableBool(int pin, const String &name, int value)
  * @param name
  * @param value
  */
+void SmartHome::setVariableValue(const String &variableName, int variableValue)
+{
+    auto variableIt = std::find_if(
+        variables.begin(), variables.end(),
+        [variableName](const Variable &variable)
+        { return variable.getName() == variableName; });
+
+    if (variableIt != variables.end())
+    {
+        // Update the value of the found variable
+        variableIt->setValue(variableValue);
+    }
+    else
+    {
+        Serial.println("Variable not found: " + variableName);
+    }
+}
+
+/**
+ * @brief Setting variable value by name
+ *
+ * @param variableName
+ * @param variableType
+ * @param variableMinValue
+ * @param variableMaxValue
+ * @param variableValue
+ */
 void SmartHome::setVariableValue(const String &variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue)
 {
     auto variableIt = std::find_if(
@@ -306,6 +333,55 @@ void SmartHome::processReceivedData(const String &data)
                 Serial.println("User ID: " + userId);
 
                 // TODO: process device data into their corresponding variables
+                int startIndex = 0;
+
+                while (startIndex < deviceData.length())
+                {
+                    int endIndex = deviceData.indexOf("--", startIndex);
+
+                    if (endIndex == -1)
+                    {
+                        endIndex = deviceData.length();
+                    }
+
+                    String variableData = deviceData.substring(startIndex, endIndex);
+
+                    // Split the variable data using the '-' delimiter
+                    int dashIndex = variableData.indexOf("-");
+                    String variableName = variableData.substring(0, dashIndex);
+                    variableData.remove(0, dashIndex + 1);
+
+                    dashIndex = variableData.indexOf("-");
+                    String variableType = variableData.substring(0, dashIndex);
+                    variableData.remove(0, dashIndex + 1);
+
+                    // Check for variable type. The two (number and boolean) variables are different in data structure
+                    int variableMinValue = 0;
+                    int variableMaxValue = 0;
+                    if (variableType.charAt(0) == 'n')
+                    {
+                        dashIndex = variableData.indexOf("-");
+                        variableMinValue = variableData.substring(0, dashIndex).toInt();
+                        variableData.remove(0, dashIndex + 1);
+
+                        dashIndex = variableData.indexOf("-");
+                        variableMaxValue = variableData.substring(0, dashIndex).toInt();
+                        variableData.remove(0, dashIndex + 1);
+                    }
+
+                    int variableValue = variableData.toInt();
+
+                    // Set the variables using the setVariableValue function
+                    setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
+                    Serial.println("Variable name: " + variableName);
+                    Serial.println("Variable type: " + variableType);
+                    Serial.println("Variable min value: " + String(variableMinValue));
+                    Serial.println("Variable max value: " + String(variableMaxValue));
+                    Serial.println("Variable value: " + String(variableValue));
+
+                    // "--"
+                    startIndex = endIndex + 2;
+                }
             }
         }
         else
