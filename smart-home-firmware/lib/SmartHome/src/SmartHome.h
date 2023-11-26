@@ -56,18 +56,25 @@ public:
     void addVariableNumber(int pin, const String &name, int minValue, int maxValue, int value);
     void addVariableBool(int pin, const String &name, int value);
 
+    int getVariableValue(const String &name);
+
     void setVariableValue(const String &name, int value);
-    void setVariableValue(const String &variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue);
+    void setVariableValue(const String &name, char type, int minValue, int maxValue, int value);
 
     void push();
-    void update(int interval);
+    void push(int interval);
+
+    void pull(int interval);
 
 private:
     String homeName;
     String homeID;
     String serverUrl;
+
     std::vector<Variable> variables;
-    unsigned long previousMillis = 0;
+
+    unsigned long previousPushMillis = 0;
+    unsigned long previousPullMillis = 0;
 
     void sendToServer(const String &data);
     String fetchDataFromServer();

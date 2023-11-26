@@ -49,14 +49,10 @@ void setup()
 
 void loop()
 {
-  // bedRoomLamp.update(20000);
-  smartDoorLock.update(1);
-  battery += 24;
-  locked += 1;
-  smartDoorLock.setVariableValue("battery", battery);
-  smartDoorLock.setVariableValue("locked", locked);
-  delay(10000);
-  smartDoorLock.push();
+  smartDoorLock.pull(20000);
+  smartDoorLock.setVariableValue("battery", 24);
+  smartDoorLock.setVariableValue("locked", 1);
+  smartDoorLock.push(10000);
 }
 
 void connectToWifi()

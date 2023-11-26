@@ -171,25 +171,48 @@ void SmartHome::addVariableBool(int pin, const String &name, int value)
 }
 
 /**
- * @brief Setting variable value by name
+ * @brief Get the variable vale by name
  * @param name
- * @param value
+ * @return int
  */
-void SmartHome::setVariableValue(const String &variableName, int variableValue)
+int SmartHome::getVariableValue(const String &variableName)
 {
     auto variableIt = std::find_if(
-        variables.begin(), variables.end(),
-        [variableName](const Variable &variable)
+        variables.begin(), variables.end(), [variableName](const Variable &variable)
         { return variable.getName() == variableName; });
 
     if (variableIt != variables.end())
     {
-        // Update the value of the found variable
-        variableIt->setValue(variableValue);
+        // Return the value of the found variable
+        return variableIt->getValue();
     }
     else
     {
         Serial.println("Variable not found: " + variableName);
+        return -1; // Or another value indicating an error
+    }
+}
+
+/**
+ * @brief Setting variable value by name
+ * @param name
+ * @param value
+ */
+void SmartHome::setVariableValue(const String &name, int value)
+{
+    auto variableIt = std::find_if(
+        variables.begin(), variables.end(),
+        [name](const Variable &variable)
+        { return variable.getName() == name; });
+
+    if (variableIt != variables.end())
+    {
+        // Update the value of the found variable
+        variableIt->setValue(value);
+    }
+    else
+    {
+        Serial.println("Variable not found: " + name);
     }
 }
 
@@ -202,21 +225,21 @@ void SmartHome::setVariableValue(const String &variableName, int variableValue)
  * @param variableMaxValue
  * @param variableValue
  */
-void SmartHome::setVariableValue(const String &variableName, char variableType, int variableMinValue, int variableMaxValue, int variableValue)
+void SmartHome::setVariableValue(const String &name, char type, int minValue, int maxValue, int value)
 {
     auto variableIt = std::find_if(
         variables.begin(), variables.end(),
-        [variableName](const Variable &variable)
-        { return variable.getName() == variableName; });
+        [name](const Variable &variable)
+        { return variable.getName() == name; });
 
     if (variableIt != variables.end())
     {
         // Update the value of the found variable
-        variableIt->setValue(variableValue);
+        variableIt->setValue(value);
     }
     else
     {
-        Serial.println("Variable not found: " + variableName);
+        Serial.println("Variable not found: " + name);
     }
 }
 
@@ -236,18 +259,38 @@ void SmartHome::push()
 }
 
 /**
- * @brief Updating data from the server within a specific interval (in milliseconds) (not implemented yet)
+ * @brief Pushing data to the server
  * @param interval in ms
  */
-void SmartHome::update(int interval)
+void SmartHome::push(int interval)
 {
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval)
+    if (millis() - previousPushMillis >= interval)
+    {
+        String data;
+        for (const auto &variable : variables)
+        {
+            data += variable.toString() + "--";
+        }
+        Serial.print("Sending data to server: ");
+        Serial.println(data);
+        // sendToServer(data);
+
+        previousPushMillis = millis();
+    }
+}
+
+/**
+ * @brief Pulling data from the server within a specific interval (in milliseconds)
+ * @param interval in ms
+ */
+void SmartHome::pull(int interval)
+{
+    if (millis() - previousPullMillis >= interval)
     {
         String receivedData = fetchDataFromServer();
         processReceivedData(receivedData);
 
-        previousMillis = currentMillis;
+        previousPullMillis = millis();
     }
 }
 
