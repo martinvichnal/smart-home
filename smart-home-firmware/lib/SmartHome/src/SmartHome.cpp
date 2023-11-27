@@ -261,46 +261,28 @@ void SmartHome::setVariableValue(const String &name, char type, int minValue, in
 }
 
 /**
- * @brief Validating home
+ * @brief Validating home. Checks if the device is already in the database. If not it creates a new device in the database
  */
 void SmartHome::validateHome()
 {
-    // Constructor - inint home, check for database availabilty and create new device database
-    // 1: Check if the device is in the DATABASE if not its prob. new.
-    // If new -> send device info to databse (device name, id, dd, user)
-    // 2:
-    // Implement HTTP GET request
-    String tmp = "89c44c3dbab948faa265ecd787743f15";
-    if (processReceivedData(fetchDataFromServer(tmp)) == false)
+    if (processReceivedData(fetchDataFromServer(getHomeID())) == false)
     {
-        Serial.println("Device not found in database");
-        Serial.println("Creating new device in database");
-        // // Implement HTTP POST request
-        // HTTPClient http;
-        // http.begin(getServerUrl());
-        // http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        Serial.println("Device not found in database... Creating new device in database");
 
-        // String payload = "homeID=" + homeID + "&userID=" + userID + "&homeName=" + homeName;
+        String data;
+        for (const auto &variable : variables)
+        {
+            data += variable.toString() + "--";
+        }
 
-        // int httpResponseCode = http.POST(payload);
-        // if (httpResponseCode > 0)
-        // {
-        //     Serial.printf("HTTP POST success, response code: %d\n", httpResponseCode);
-        // }
-        // else
-        // {
-        //     Serial.printf("HTTP POST failed, response code: %d\n", httpResponseCode);
-        // }
-
-        // http.end();
+        sendToServer(data);
     }
     else
     {
-        Serial.println("Device found in database");
-        Serial.println("Proceedeing startup");
+        Serial.println("Device found in database... Proceedeing startup and fetching data from server");
     }
 
-    // processReceivedData(fetchDataFromServer());
+    processReceivedData(fetchDataFromServer(getHomeID()));
 }
 
 /**
@@ -313,9 +295,11 @@ void SmartHome::push()
     {
         data += variable.toString() + "--";
     }
+    Serial.println();
     Serial.print("Sending data to server: ");
     Serial.println(data);
-    // sendToServer(data);
+    Serial.println();
+    sendToServer(data);
 }
 
 /**
@@ -331,9 +315,11 @@ void SmartHome::push(int interval)
         {
             data += variable.toString() + "--";
         }
+        Serial.println();
         Serial.print("Sending data to server: ");
         Serial.println(data);
-        // sendToServer(data);
+        Serial.println();
+        sendToServer(data);
 
         previousPushMillis = millis();
     }
@@ -347,9 +333,7 @@ void SmartHome::pull(int interval)
 {
     if (millis() - previousPullMillis >= interval)
     {
-        String receivedData = fetchDataFromServer(getHomeID());
-        processReceivedData(receivedData);
-
+        processReceivedData(fetchDataFromServer(getHomeID()));
         previousPullMillis = millis();
     }
 }
@@ -357,18 +341,33 @@ void SmartHome::pull(int interval)
 /**
  * @brief Sending data to the server with HTTP API POST request (not implemented yet)
  * @todo Implement HTTP POST request
- * @param data
+ * @param data - device data
  */
 void SmartHome::sendToServer(const String &data)
 {
+    Serial.println();
+    Serial.println("Sending data to server: ");
+    char jsonOutput[1024];
     // Implement HTTP POST request
     HTTPClient http;
-    http.begin("");
-    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    http.begin("https://smart-home-green.vercel.app/api/db/device");
+    http.addHeader("Content-Type", "application/json");
 
-    String payload = "homeID=" + homeID + "&data=" + data;
+    const size_t CAPACITY = JSON_OBJECT_SIZE(4);
+    StaticJsonDocument<CAPACITY> doc;
 
-    int httpResponseCode = http.POST(payload);
+    JsonObject object = doc.to<JsonObject>();
+    object["did"] = getHomeID();
+    object["dn"] = getHomeName();
+    object["dd"] = data;
+    object["uid"] = getUserID();
+    
+    Serial.println(getHomeID());
+    Serial.println(getHomeName());
+    Serial.println(data);
+    Serial.println(getUserID());
+    serializeJson(doc, jsonOutput);
+    int httpResponseCode = http.POST(String(jsonOutput));
     if (httpResponseCode > 0)
     {
         Serial.printf("HTTP POST success, response code: %d\n", httpResponseCode);
@@ -379,16 +378,20 @@ void SmartHome::sendToServer(const String &data)
     }
 
     http.end();
+    Serial.println();
 }
 
 /**
- * @brief Fetching data from the server with HTTP API GET request (not implemented yet)
+ * @brief Fetching data from the server with HTTP API GET request
  * @todo Implement HTTP GET request
- * @return String
+ * @return String - received data from the server
+ * @param parameter - device ID
  */
 String SmartHome::fetchDataFromServer(const String &parameter)
 {
-    // Implement HTTP GET request
+    Serial.println();
+    Serial.println("Fetching data from server: ");
+
     HTTPClient http;
     http.begin(getServerUrl() + "?did=" + parameter);
 
@@ -406,17 +409,19 @@ String SmartHome::fetchDataFromServer(const String &parameter)
     }
 
     http.end();
+    Serial.println();
 }
 
 /**
  * @brief Processing received data from the server (not implemented yet)
  * @todo Process device data into their corresponding variables
  * @param data
- * @return true if data is processed or has something in it.
- * @return false if data is empty
+ * @return true - if data is processed or has something in it.
+ * @return false - if data is empty
  */
 bool SmartHome::processReceivedData(const String &data)
 {
+    Serial.println();
     DynamicJsonDocument jsonData(1024);
     DeserializationError error = deserializeJson(jsonData, data);
 
@@ -438,6 +443,8 @@ bool SmartHome::processReceivedData(const String &data)
                     String deviceData = device["DD"].as<String>();
                     String userId = device["UID"].as<String>();
 
+                    Serial.println();
+                    Serial.println("Parsed data from server:");
                     Serial.println("Device ID: " + deviceId);
                     Serial.println("Device name: " + deviceName);
                     Serial.println("Device data: " + deviceData);
@@ -484,6 +491,8 @@ bool SmartHome::processReceivedData(const String &data)
 
                         // Set the variables using the setVariableValue function
                         setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
+                        Serial.println();
+                        Serial.println("Parsed variable data:");
                         Serial.println("Variable name: " + variableName);
                         Serial.println("Variable type: " + variableType);
                         Serial.println("Variable min value: " + String(variableMinValue));
@@ -506,4 +515,5 @@ bool SmartHome::processReceivedData(const String &data)
     {
         Serial.println("Deserialization error: " + String(error.c_str()));
     }
+    Serial.println();
 }
