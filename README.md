@@ -174,24 +174,28 @@ Structure of the data communication example in JSON format:
 ```JSON
 [
   {
-    "did":"72ca9db90d31439dbf540c48b07abdb6",
-    "dn":"Bedroom Lamp",
-    "dd":"pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255"
+    "DID": "05b31779-14ee-4233-8c9a-2749e81d3ccb",
+    "DN": "Thermostat",
+    "DD": "temperature-n-0-100-34--humidity-n-0-100-61--state-b-0-0-0--",
+    "UID": "80ff2b60-bf4b-42fe-8de4-d21734a393c8"
   },
   {
-    "did":"f33573d762614e47a0008659bb5de53e",
-    "dn":"Bedroom Switcher Hub",
-    "dd":"Power-b-false--battery-n-0-100-50.2--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true--Air Conditioner-b-false--Door-b-false--Window-b-false"
+    "DID": "08659bb5de53e40c48b07ab90b25d29e4",
+    "DN": "Kitchen Switcher Hub",
+    "DD": "Power-b-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false",
+    "UID": "d480b324-d6bd-4e05-820f-c807a7a5ed7e"
   },
   {
-    "did":"a550b29757374abda73c15d29e2cd1e1",
-    "dn":"Smart Thermostat",
-    "dd":"temperature-n-0-100-24.4--humidity-n-0-100-69.123--state-b-true--battery-n-0-100-24"
+    "DID": "72ca9db90d31439dbf540c48b07abdb6",
+    "DN": "Bedroom Lamp",
+    "DD": "pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255",
+    "UID": "09c007bd-526b-4d8e-a9b9-96daff857759"
   },
   {
-    "did":"89c44c3dbab948faa265ecd787743f15",
-    "dn":"Smart Door Lock",
-    "dd":"locked-b-false--battery-n-0-100-98"
+    "DID": "89c44c3dbab948faa265ecd787743f15",
+    "DN": "Smart Door Lock",
+    "DD": "locked-b-false--battery-n-0-100-96",
+    "UID": "09c007bd-526b-4d8e-a9b9-96daff857759"
   }
 ]
 ```
