@@ -47,10 +47,11 @@ private:
 class SmartHome
 {
 public:
-    SmartHome(const String &homeName, const String &homeID, const String &serverUrl);
+    SmartHome(const String &homeName, const String &homeID, const String &userID, const String &serverUrl);
 
     String getHomeID() const;
     String getHomeName() const;
+    String getUserID() const;
     String getServerUrl() const;
 
     void addVariableNumber(int pin, const String &name, int minValue, int maxValue, int value);
@@ -61,6 +62,8 @@ public:
     void setVariableValue(const String &name, int value);
     void setVariableValue(const String &name, char type, int minValue, int maxValue, int value);
 
+    void validateHome();
+
     void push();
     void push(int interval);
 
@@ -69,6 +72,7 @@ public:
 private:
     String homeName;
     String homeID;
+    String userID;
     String serverUrl;
 
     std::vector<Variable> variables;
@@ -77,8 +81,8 @@ private:
     unsigned long previousPullMillis = 0;
 
     void sendToServer(const String &data);
-    String fetchDataFromServer();
-    void processReceivedData(const String &data);
+    String fetchDataFromServer(const String &parameter);
+    bool processReceivedData(const String &data);
 };
 
 #endif

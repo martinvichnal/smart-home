@@ -116,8 +116,16 @@ void Variable::setValue(int newValue)
 
 
 */
-SmartHome::SmartHome(const String &homeName, const String &homeID, const String &serverUrl)
-    : homeName(homeName), homeID(homeID), serverUrl(serverUrl) {}
+
+/**
+ * @brief Constructor
+ * @param homeName
+ * @param homeID
+ * @param userID
+ * @param serverUrl
+ */
+SmartHome::SmartHome(const String &homeName, const String &homeID, const String &userID, const String &serverUrl)
+    : homeName(homeName), homeID(homeID), userID(userID), serverUrl(serverUrl) {}
 
 /**
  * @brief Getting home ID
@@ -135,6 +143,15 @@ String SmartHome::getHomeID() const
 String SmartHome::getHomeName() const
 {
     return homeName;
+}
+
+/**
+ * @brief Getting the home's owner userID
+ * @return String
+ */
+String SmartHome::getUserID() const
+{
+    return userID;
 }
 
 /**
@@ -244,6 +261,49 @@ void SmartHome::setVariableValue(const String &name, char type, int minValue, in
 }
 
 /**
+ * @brief Validating home
+ */
+void SmartHome::validateHome()
+{
+    // Constructor - inint home, check for database availabilty and create new device database
+    // 1: Check if the device is in the DATABASE if not its prob. new.
+    // If new -> send device info to databse (device name, id, dd, user)
+    // 2:
+    // Implement HTTP GET request
+    String tmp = "89c44c3dbab948faa265ecd787743f15";
+    if (processReceivedData(fetchDataFromServer(tmp)) == false)
+    {
+        Serial.println("Device not found in database");
+        Serial.println("Creating new device in database");
+        // // Implement HTTP POST request
+        // HTTPClient http;
+        // http.begin(getServerUrl());
+        // http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        // String payload = "homeID=" + homeID + "&userID=" + userID + "&homeName=" + homeName;
+
+        // int httpResponseCode = http.POST(payload);
+        // if (httpResponseCode > 0)
+        // {
+        //     Serial.printf("HTTP POST success, response code: %d\n", httpResponseCode);
+        // }
+        // else
+        // {
+        //     Serial.printf("HTTP POST failed, response code: %d\n", httpResponseCode);
+        // }
+
+        // http.end();
+    }
+    else
+    {
+        Serial.println("Device found in database");
+        Serial.println("Proceedeing startup");
+    }
+
+    // processReceivedData(fetchDataFromServer());
+}
+
+/**
  * @brief Pushing data to the server
  */
 void SmartHome::push()
@@ -287,7 +347,7 @@ void SmartHome::pull(int interval)
 {
     if (millis() - previousPullMillis >= interval)
     {
-        String receivedData = fetchDataFromServer();
+        String receivedData = fetchDataFromServer(getHomeID());
         processReceivedData(receivedData);
 
         previousPullMillis = millis();
@@ -326,11 +386,11 @@ void SmartHome::sendToServer(const String &data)
  * @todo Implement HTTP GET request
  * @return String
  */
-String SmartHome::fetchDataFromServer()
+String SmartHome::fetchDataFromServer(const String &parameter)
 {
     // Implement HTTP GET request
     HTTPClient http;
-    http.begin(getServerUrl() + "?did=" + getHomeID());
+    http.begin(getServerUrl() + "?did=" + parameter);
 
     int httpResponseCode = http.GET();
     if (httpResponseCode == HTTP_CODE_OK)
@@ -352,8 +412,10 @@ String SmartHome::fetchDataFromServer()
  * @brief Processing received data from the server (not implemented yet)
  * @todo Process device data into their corresponding variables
  * @param data
+ * @return true if data is processed or has something in it.
+ * @return false if data is empty
  */
-void SmartHome::processReceivedData(const String &data)
+bool SmartHome::processReceivedData(const String &data)
 {
     DynamicJsonDocument jsonData(1024);
     DeserializationError error = deserializeJson(jsonData, data);
@@ -363,68 +425,76 @@ void SmartHome::processReceivedData(const String &data)
         if (jsonData.is<JsonArray>())
         {
             JsonArray devices = jsonData.as<JsonArray>();
-            for (const auto &device : devices)
+            if (devices.size() == 0)
             {
-                String deviceId = device["DID"].as<String>();
-                String deviceName = device["DN"].as<String>();
-                String deviceData = device["DD"].as<String>();
-                String userId = device["UID"].as<String>();
-
-                Serial.println("Device ID: " + deviceId);
-                Serial.println("Device name: " + deviceName);
-                Serial.println("Device data: " + deviceData);
-                Serial.println("User ID: " + userId);
-
-                // TODO: process device data into their corresponding variables
-                int startIndex = 0;
-
-                while (startIndex < deviceData.length())
+                return false;
+            }
+            else
+            {
+                for (const auto &device : devices)
                 {
-                    int endIndex = deviceData.indexOf("--", startIndex);
+                    String deviceId = device["DID"].as<String>();
+                    String deviceName = device["DN"].as<String>();
+                    String deviceData = device["DD"].as<String>();
+                    String userId = device["UID"].as<String>();
 
-                    if (endIndex == -1)
+                    Serial.println("Device ID: " + deviceId);
+                    Serial.println("Device name: " + deviceName);
+                    Serial.println("Device data: " + deviceData);
+                    Serial.println("User ID: " + userId);
+
+                    // TODO: process device data into their corresponding variables
+                    int startIndex = 0;
+
+                    while (startIndex < deviceData.length())
                     {
-                        endIndex = deviceData.length();
-                    }
+                        int endIndex = deviceData.indexOf("--", startIndex);
 
-                    String variableData = deviceData.substring(startIndex, endIndex);
+                        if (endIndex == -1)
+                        {
+                            endIndex = deviceData.length();
+                        }
 
-                    // Split the variable data using the '-' delimiter
-                    int dashIndex = variableData.indexOf("-");
-                    String variableName = variableData.substring(0, dashIndex);
-                    variableData.remove(0, dashIndex + 1);
+                        String variableData = deviceData.substring(startIndex, endIndex);
 
-                    dashIndex = variableData.indexOf("-");
-                    String variableType = variableData.substring(0, dashIndex);
-                    variableData.remove(0, dashIndex + 1);
-
-                    // Check for variable type. The two (number and boolean) variables are different in data structure
-                    int variableMinValue = 0;
-                    int variableMaxValue = 0;
-                    if (variableType.charAt(0) == 'n')
-                    {
-                        dashIndex = variableData.indexOf("-");
-                        variableMinValue = variableData.substring(0, dashIndex).toInt();
+                        // Split the variable data using the '-' delimiter
+                        int dashIndex = variableData.indexOf("-");
+                        String variableName = variableData.substring(0, dashIndex);
                         variableData.remove(0, dashIndex + 1);
 
                         dashIndex = variableData.indexOf("-");
-                        variableMaxValue = variableData.substring(0, dashIndex).toInt();
+                        String variableType = variableData.substring(0, dashIndex);
                         variableData.remove(0, dashIndex + 1);
+
+                        // Check for variable type. The two (number and boolean) variables are different in data structure
+                        int variableMinValue = 0;
+                        int variableMaxValue = 0;
+                        if (variableType.charAt(0) == 'n')
+                        {
+                            dashIndex = variableData.indexOf("-");
+                            variableMinValue = variableData.substring(0, dashIndex).toInt();
+                            variableData.remove(0, dashIndex + 1);
+
+                            dashIndex = variableData.indexOf("-");
+                            variableMaxValue = variableData.substring(0, dashIndex).toInt();
+                            variableData.remove(0, dashIndex + 1);
+                        }
+
+                        int variableValue = variableData.toInt();
+
+                        // Set the variables using the setVariableValue function
+                        setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
+                        Serial.println("Variable name: " + variableName);
+                        Serial.println("Variable type: " + variableType);
+                        Serial.println("Variable min value: " + String(variableMinValue));
+                        Serial.println("Variable max value: " + String(variableMaxValue));
+                        Serial.println("Variable value: " + String(variableValue));
+
+                        // "--"
+                        startIndex = endIndex + 2;
                     }
-
-                    int variableValue = variableData.toInt();
-
-                    // Set the variables using the setVariableValue function
-                    setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
-                    Serial.println("Variable name: " + variableName);
-                    Serial.println("Variable type: " + variableType);
-                    Serial.println("Variable min value: " + String(variableMinValue));
-                    Serial.println("Variable max value: " + String(variableMaxValue));
-                    Serial.println("Variable value: " + String(variableValue));
-
-                    // "--"
-                    startIndex = endIndex + 2;
                 }
+                return true;
             }
         }
         else
