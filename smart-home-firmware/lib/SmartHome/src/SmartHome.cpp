@@ -277,7 +277,7 @@ void SmartHome::validateHome()
         }
 
         HTTPClient http;
-        http.begin("https://smart-home-green.vercel.app/api/db/device");
+        http.begin(serverUrl);
         http.addHeader("Content-Type", "application/json");
 
         String did = getHomeID();
@@ -370,7 +370,7 @@ void SmartHome::sendToServer(const String data)
     Serial.println("SEND - Sending data to server");
 
     HTTPClient http;
-    http.begin("https://smart-home-green.vercel.app/api/db/device");
+    http.begin(serverUrl);
     http.addHeader("Content-Type", "application/json");
 
     String did = getHomeID();
@@ -406,7 +406,8 @@ String SmartHome::fetchDataFromServer(const String parameter)
     Serial.println("FETCH - Fetching data from server");
 
     HTTPClient http;
-    http.begin(getServerUrl() + "?did=" + parameter);
+    http.begin(serverUrl + "?did=" + parameter);
+    Serial.println("Requesting on: " + serverUrl + "?did=" + parameter);
 
     int httpResponseCode = http.GET();
     if (httpResponseCode == HTTP_CODE_OK)
@@ -435,7 +436,7 @@ String SmartHome::fetchDataFromServer(const String parameter)
 bool SmartHome::processReceivedData(const String data)
 {
     Serial.println();
-    DynamicJsonDocument jsonData(1024);
+    DynamicJsonDocument jsonData(2048);
     DeserializationError error = deserializeJson(jsonData, data);
 
     if (error == DeserializationError::Ok)

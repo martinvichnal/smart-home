@@ -14,7 +14,8 @@ const getDevices = asyncHandler(async (req, res) => {
     try {
         var request = new sql.Request()
         const result = await request.query(query)
-        res.status(200).json({ success: true, data: result.recordset })
+        // res.status(200).json({ success: true, data: result.recordset })
+        res.status(200).json(result.recordset)
     } catch (error) {
         res.status(405).json({
             success: false,
@@ -39,7 +40,8 @@ const getDevice = asyncHandler(async (req, res) => {
     try {
         var request = new sql.Request()
         const result = await request.query(query)
-        res.status(200).json({ success: true, data: result.recordset })
+        // res.status(200).json({ success: true, data: result.recordset })
+        res.status(200).json(result.recordset)
     } catch (error) {
         res.status(405).json({
             success: false,
@@ -62,7 +64,8 @@ const createDevices = asyncHandler(async (req, res) => {
     try {
         var request = new sql.Request()
         const result = await request.query(query)
-        res.status(200).json({ success: true, data: result.recordset })
+        // res.status(200).json({ success: true, data: result.recordset })
+        res.status(200).json(result.recordset)
     } catch (error) {
         res.status(405).json({
             success: false,
@@ -86,7 +89,8 @@ const updateDevice = asyncHandler(async (req, res) => {
     try {
         var request = new sql.Request()
         const result = await request.query(query)
-        res.status(200).json({ success: true, data: result.recordset })
+        // res.status(200).json({ success: true, data: result.recordset })
+        res.status(200).json(result.recordset)
     } catch (error) {
         res.status(405).json({
             success: false,
@@ -109,7 +113,8 @@ const deleteDevice = asyncHandler(async (req, res) => {
     try {
         var request = new sql.Request()
         const result = await request.query(query)
-        res.status(200).json({ success: true, data: result.recordset })
+        // res.status(200).json({ success: true, data: result.recordset })\
+        res.status(200).json(result.recordset)
     } catch (error) {
         res.status(405).json({
             success: false,
