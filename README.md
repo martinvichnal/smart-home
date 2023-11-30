@@ -167,6 +167,31 @@ export async function POST(request)
 export async function DELETE(request)
 ```
 
+
+Example:
+
+```JavaScript
+https://myserver.com/api/devices/device?did=05b31779-14ee-4233-8c9a-2749e81d3ccb -> GET request
+-> response:
+        {
+            "DID": "05b31779-14ee-4233-8c9a-2749e81d3ccb",
+            "DN": "Thermostat",
+            "DD": "temperature-n-0-100-34--humidity-n-0-100-61--state-b-0-0-0--",
+            "UID": "80ff2b60-bf4b-42fe-8de4-d21734a393c8"
+        },
+
+https://myserver.com/api/devices/device -> PUT request
+-> request body:
+        {
+            "DID": "05b31779-14ee-4233-8c9a-2749e81d3ccb",
+            "DN": "Thermostat",
+            "DD": "temperature-n-0-100-34--humidity-n-0-100-61--state-b-0-0-0--",
+            "UID": "80ff2b60-bf4b-42fe-8de4-d21734a393c8"
+        },
+-> response: "Device updated successfully"
+```
+
+
 ### Data Structures
 
 Structure of the data communication example in JSON format:
