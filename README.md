@@ -90,9 +90,9 @@ DEVICES:
 /**
  * @description Get a device from the database by ID or by user ID
  * @method GET
- * @API /api/db/device
- * @API /api/db/device?did={did}
- * @API /api/db/device?uid={uid}
+ * @API /api/devices
+ * @API /api/devices/device?did={did}
+ * @API /api/device/device?uid={uid}
  * @body -
  * @returns {JSON} result
  */
@@ -101,7 +101,7 @@ export async function GET(request)
 /**
  * @description Update device data in the database by ID
  * @method PUT
- * @API /api/db/device
+ * @API /api/devices/device
  * @body {JSON} {did, dd}
  * @returns {JSON} result
  */
@@ -110,7 +110,7 @@ export async function PUT(request)
 /**
  * @description Add (insert) a device to the database
  * @method POST
- * @API /api/db/device
+ * @API /api/devices
  * @body {JSON} {did, dn, dd, uid}
  * @returns {JSON} result
  */
@@ -119,7 +119,7 @@ export async function POST(request)
 /**
  * @description Delete a device from the database by ID
  * @method DELETE
- * @API /api/db/device
+ * @API /api/devices/device
  * @body {JSON} {did}
  * @returns {JSON} result
  */
@@ -132,8 +132,8 @@ USERS:
 /**
  * @description Get all user from the database or by ID
  * @method GET
- * @API /api/db/user
- * @API /api/db/user?uid={uid}
+ * @API /api/users
+ * @API /api/users/user?uid={uid}
  * @body -
  * @returns {JSON} result
  */
@@ -142,7 +142,7 @@ export async function GET(request)
 /**
  * @description Update user data in the database by ID
  * @method PUT
- * @API /api/db/user
+ * @API /api/users/user
  * @body {JSON} {uid}
  * @returns {JSON} result
  */
@@ -151,7 +151,7 @@ export async function PUT(request)
 /**
  * @description Add (insert) a user to the database
  * @method POST
- * @API /api/db/user
+ * @API /api/users
  * @body {JSON} {uid}
  * @returns {JSON} result
  */
@@ -160,7 +160,7 @@ export async function POST(request)
 /**
  * @description Delete a user from the database by ID
  * @method DELETE
- * @API /api/db/user
+ * @API /api/users/user
  * @body {JSON} {uid}
  * @returns {JSON} result
  */
