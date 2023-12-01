@@ -30,11 +30,22 @@ function parseDeviceDataString(deviceDataString) {
     let deviceData = {}
     properties.forEach((property) => {
         const [name, type, min, max, value] = property.split("-")
+        let v
+        if (type === "b") {
+            if (value === "0" || value.toLowerCase() === "false") {
+                v = false
+            } else if (value === "1" || value.toLowerCase() === "true") {
+                v = true
+            }
+        } else if (type === "n") {
+            v = Number(value)
+        }
+
         deviceData[name] = {
             type,
             min: Number(min),
             max: Number(max),
-            value: type === "b" ? value === "true" : Number(value),
+            value: v,
         }
     })
     return deviceData
@@ -65,7 +76,7 @@ export default function DeviceBox({ device, onDeviceChange }) {
             const deviceDataString = stringifyDeviceData(values)
             try {
                 const response = await axios.put(
-                    "http://192.168.0.53:8080/api/devices/device",
+                    "http://192.168.0.53:8080/api/devices/deviceDID",
                     {
                         did: device.DID,
                         dd: deviceDataString + "--",

@@ -13,7 +13,11 @@ export default function Devices() {
     }
 
     useEffect(() => {
-        fetchDevices()
+        // fetchDevices()
+        const intervalId = setInterval(fetchDevices, 5000) // Fetch every 5 seconds
+
+        // Clean up the interval on unmount
+        return () => clearInterval(intervalId)
     }, [])
 
     const handleDeviceChange = (deviceID) => {
@@ -37,3 +41,19 @@ export default function Devices() {
         </div>
     )
 }
+
+/*
+    const [devices, setDevices] = useState([]);
+
+    useEffect(() => {
+        const socket = new WebSocket('ws://your-server-url');
+
+        socket.onmessage = (event) => {
+            const newDevices = JSON.parse(event.data);
+            setDevices(newDevices);
+        };
+
+        // Clean up the WebSocket connection on unmount
+        return () => socket.close();
+    }, []);
+*/

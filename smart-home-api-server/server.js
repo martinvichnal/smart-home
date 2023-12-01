@@ -18,3 +18,7 @@ app.use("/api/users", require("./routes/userRoutes"))
 app.listen(port, () => {
     console.log(`Server running on port: ${port}`)
 })
+
+// docker build . -t smart-home-api
+// docker run -p 8080:8080 smart-home-api
+// docker ps -a

@@ -36,7 +36,28 @@ Variable::Variable(int pin, const String name, char type, int minValue, int maxV
  */
 String Variable::toString() const
 {
-    return name + "-" + type + "-" + String(minValue) + "-" + String(maxValue) + "-" + String(value);
+    String n = getName();
+    String t = String(getType());
+    String min = String(getMinValue());
+    String max = String(getMaxValue());
+    String v = String(getValue());
+    // if(t == "b")
+    // {
+    //     if (getValue() == 0)
+    //     {
+    //         String v = "false";
+    //     }
+    //     else if (getValue() == 1)
+    //     {
+    //         String v = "true";
+    //     }
+    // }
+    // else if(t == "n")
+    // {
+    //     String v = String(getValue());
+    // }
+
+    return n + "-" + t + "-" + min + "-" + max + "-" + v;
 }
 
 /**
@@ -233,32 +254,32 @@ void SmartHome::setVariableValue(const String name, int value)
     }
 }
 
-/**
- * @brief Setting variable value by name
- *
- * @param variableName
- * @param variableType
- * @param variableMinValue
- * @param variableMaxValue
- * @param variableValue
- */
-void SmartHome::setVariableValue(const String name, char type, int minValue, int maxValue, int value)
-{
-    auto variableIt = std::find_if(
-        variables.begin(), variables.end(),
-        [name](const Variable variable)
-        { return variable.getName() == name; });
+// /**
+//  * @brief Setting variable value by name
+//  *
+//  * @param variableName
+//  * @param variableType
+//  * @param variableMinValue
+//  * @param variableMaxValue
+//  * @param variableValue
+//  */
+// void SmartHome::setVariableValue(const String name, char type, int minValue, int maxValue, int value)
+// {
+//     auto variableIt = std::find_if(
+//         variables.begin(), variables.end(),
+//         [name](const Variable variable)
+//         { return variable.getName() == name; });
 
-    if (variableIt != variables.end())
-    {
-        // Update the value of the found variable
-        variableIt->setValue(value);
-    }
-    else
-    {
-        Serial.println("ERROR! - Variable not found: " + name);
-    }
-}
+//     if (variableIt != variables.end())
+//     {
+//         // Update the value of the found variable
+//         variableIt->setValue(value);
+//     }
+//     else
+//     {
+//         Serial.println("ERROR! - Variable not found: " + name);
+//     }
+// }
 
 /**
  * @brief Validating home. Checks if the device is already in the database. If not it creates a new device in the database
@@ -277,7 +298,7 @@ void SmartHome::validateHome()
         }
 
         HTTPClient http;
-        http.begin(serverUrl);
+        http.begin(serverUrl + "/api/devices");
         http.addHeader("Content-Type", "application/json");
 
         String did = getHomeID();
@@ -286,7 +307,7 @@ void SmartHome::validateHome()
         String uid = getUserID();
 
         String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
-        Serial.println("VALIDATE - Custom JSON output: " + jsonOutput);
+        Serial.println("VALIDATE - " + serverUrl + "/api/devices" + " body: " + jsonOutput);
 
         int httpResponseCode = http.POST(String(jsonOutput));
         if (httpResponseCode > 0)
@@ -370,7 +391,7 @@ void SmartHome::sendToServer(const String data)
     Serial.println("SEND - Sending data to server");
 
     HTTPClient http;
-    http.begin(serverUrl);
+    http.begin(serverUrl + "/api/devices/deviceDID");
     http.addHeader("Content-Type", "application/json");
 
     String did = getHomeID();
@@ -379,7 +400,7 @@ void SmartHome::sendToServer(const String data)
     String uid = getUserID();
 
     String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
-    Serial.println("SEND - Custom JSON output: " + jsonOutput);
+    Serial.println("SEND - " + serverUrl + "/api/devices" + " body: " + jsonOutput);    
 
     int httpResponseCode = http.PUT(String(jsonOutput));
     if (httpResponseCode > 0)
@@ -406,8 +427,8 @@ String SmartHome::fetchDataFromServer(const String parameter)
     Serial.println("FETCH - Fetching data from server");
 
     HTTPClient http;
-    http.begin(serverUrl + "?did=" + parameter);
-    Serial.println("Requesting on: " + serverUrl + "?did=" + parameter);
+    http.begin(serverUrl + "/api/devices/deviceDID?did=" + parameter);
+    Serial.println("Requesting on: " + serverUrl + "/api/devices/deviceDID?did=" + parameter);
 
     int httpResponseCode = http.GET();
     if (httpResponseCode == HTTP_CODE_OK)
@@ -503,7 +524,9 @@ bool SmartHome::processReceivedData(const String data)
                         int variableValue = variableData.toInt();
 
                         // Set the variables using the setVariableValue function
-                        setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
+                        // setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
+                        setVariableValue(variableName, variableValue);
+                        Serial.println(variableValue);
 
                         Serial.println();
                         Serial.println("Parsed variable data:");

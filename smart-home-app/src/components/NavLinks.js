@@ -26,7 +26,7 @@ export default function NavLinks() {
         },
         {
             name: "API / Device with ID",
-            href: `${process.env.API_SERVER_NAME}/api/devices/device?did=05b31779-14ee-4233-8c9a-2749e81d3ccb`,
+            href: `${process.env.API_SERVER_NAME}/api/devices/deviceDID?did=05b31779-14ee-4233-8c9a-2749e81d3ccb`,
         },
     ]
 

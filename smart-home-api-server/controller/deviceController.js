@@ -2,15 +2,16 @@ const asyncHandler = require("express-async-handler")
 const sql = require("mssql")
 
 /**
- * @description Getting all devices from the database
+ * @description Getting all devices
  * @route GET /api/devices
- * @param http://{server}/api/devices
+ * @param NULL
  * @returns data JSON array || status: 200
- * @example http://localhost:3000/api/devices
+ * @example http://localhost:1234/api/devices
  * @access public
  */
 const getDevices = asyncHandler(async (req, res) => {
-    const query = "SELECT * FROM devices"
+    const query = `SELECT * FROM devices;`
+
     try {
         var request = new sql.Request()
         const result = await request.query(query)
@@ -25,19 +26,39 @@ const getDevices = asyncHandler(async (req, res) => {
 })
 
 /**
- * @description Getting a device from the database by id
- * @route GET /api/devices/device
- * @param http://{server}/api/devices/device?did={device ID}
+ * @description Getting a device by device id
+ * @route GET /api/devices/deviceDID
+ * @param ?did={deviceID}
  * @returns data JSON array || status: 200
- * @example http://localhost:3000/api/devices/device?did=a550b29757374abda73c15d29e2cd1e1
- * 80ff2b60-bf4b-42fe-8de4-d21734a393c8
+ * @example http://localhost:1234/api/devices/deviceDID?did=123456789
  * @access public
  */
-const getDevice = asyncHandler(async (req, res) => {
-    // const { didBody } = req.body
-    // console.log(didBody)
-    // const did = req.query.did
+const getDeviceDID = asyncHandler(async (req, res) => {
+    const did = req.query.did
+    const query = `SELECT * FROM devices WHERE DID='${did}';`
 
+    try {
+        var request = new sql.Request()
+        const result = await request.query(query)
+        // res.status(200).json({ success: true, data: result.recordset })
+        res.status(200).json(result.recordset)
+    } catch (error) {
+        res.status(405).json({
+            success: false,
+            error: error.message,
+        })
+    }
+})
+
+/**
+ * @description Getting a device by user id
+ * @route GET /api/devices/deviceUID
+ * @param ?uid={userID}
+ * @returns data JSON array || status: 200
+ * @example http://localhost:1234/api/devices/deviceUID?did=123456789
+ * @access public
+ */
+const getDeviceUID = asyncHandler(async (req, res) => {
     const uid = req.query.uid
     const query = `SELECT * FROM devices WHERE UID='${uid}';`
 
@@ -55,11 +76,11 @@ const getDevice = asyncHandler(async (req, res) => {
 })
 
 /**
- * @description Creating a device from the database
- * @route PUT /api/devices/device
- * @param http://{server}/api/devices/device?did={device ID}
+ * @description Creating a device by user id
+ * @route POST /api/devices
+ * @param body: {did, dn, dd, uid}
  * @returns data JSON array || status: 200
- * @example http://localhost:3000/api/devices/device?did=a550b29757374abda73c15d29e2cd1e1
+ * @example http://localhost:1234/api/devices
  * @access public
  */
 const createDevices = asyncHandler(async (req, res) => {
@@ -79,11 +100,11 @@ const createDevices = asyncHandler(async (req, res) => {
 })
 
 /**
- * @description Updating a device from the database
- * @route POST /api/devices/device
- * @param http://{server}/api/devices/device?did={device ID}
+ * @description Update device data by device id
+ * @route PUT /api/devices/deviceDID
+ * @param body: {did, dd}
  * @returns data JSON array || status: 200
- * @example http://localhost:3000/api/devices/device?did=a550b29757374abda73c15d29e2cd1e1
+ * @example http://localhost:1234/api/devices/deviceDID
  * @access public
  */
 const updateDevice = asyncHandler(async (req, res) => {
@@ -104,11 +125,11 @@ const updateDevice = asyncHandler(async (req, res) => {
 })
 
 /**
- * @description Deleting a device from the database
- * @route DELETE /api/devices/device
- * @param http://{server}/api/devices/device?did={device ID}
+ * @description Delete device data by device id
+ * @route DELETE /api/devices/deviceDID
+ * @param body: {did}
  * @returns data JSON array || status: 200
- * @example http://localhost:3000/api/devices/device?did=a550b29757374abda73c15d29e2cd1e1
+ * @example http://localhost:1234/api/devices/deviceDID
  * @access public
  */
 const deleteDevice = asyncHandler(async (req, res) => {
@@ -129,7 +150,8 @@ const deleteDevice = asyncHandler(async (req, res) => {
 
 module.exports = {
     getDevices,
-    getDevice,
+    getDeviceDID,
+    getDeviceUID,
     createDevices,
     updateDevice,
     deleteDevice,
