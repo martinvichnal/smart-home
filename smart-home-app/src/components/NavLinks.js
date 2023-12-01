@@ -13,14 +13,20 @@ export default function NavLinks() {
 
     const links = [
         { name: "Home", href: "/" },
-        { name: "Devices", href: `/devices/${user.uid}` },
+        { name: "Devices", href: `/devices` },
         { name: "Testing", href: "/tester" },
         { name: "Settings", href: "/" },
-        { name: "API / Users", href: "/api/auth" },
-        { name: "API / Device", href: "/api/device" },
+        {
+            name: "API / Users",
+            href: `${process.env.API_SERVER_NAME}/api/users`,
+        },
+        {
+            name: "API / Devices",
+            href: `${process.env.API_SERVER_NAME}/api/devices`,
+        },
         {
             name: "API / Device with ID",
-            href: "/api/device?did=72ca9db90d31439dbf540c48b07abdb6",
+            href: `${process.env.API_SERVER_NAME}/api/devices/device?did=05b31779-14ee-4233-8c9a-2749e81d3ccb`,
         },
     ]
 

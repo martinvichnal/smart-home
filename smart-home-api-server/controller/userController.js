@@ -25,6 +25,7 @@ const getUsers = asyncHandler(async (req, res) => {
 const getUser = asyncHandler(async (req, res) => {
     const uid = req.query.did // Getting the id from the url
     const { didBody } = req.body
+    console.log(uid)
     // const { didFromBody } = req.body // Getting the data from the body
     const query = `SELECT * FROM users WHERE UID='${uid}';`
     try {

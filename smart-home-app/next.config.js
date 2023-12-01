@@ -10,6 +10,7 @@ const nextConfig = {
 module.exports = {
     // reactStrictMode: true,
     env: {
+        API_SERVER_NAME: process.env.API_SERVER_NAME,
         DB_CONNECTION_STRING: process.env.DB_CONNECTION_STRING,
         API_KEY: process.env.API_KEY,
         AUTH_DOMAIN: process.env.AUTH_DOMAIN,

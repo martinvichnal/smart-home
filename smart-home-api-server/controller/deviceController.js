@@ -30,13 +30,17 @@ const getDevices = asyncHandler(async (req, res) => {
  * @param http://{server}/api/devices/device?did={device ID}
  * @returns data JSON array || status: 200
  * @example http://localhost:3000/api/devices/device?did=a550b29757374abda73c15d29e2cd1e1
+ * 80ff2b60-bf4b-42fe-8de4-d21734a393c8
  * @access public
  */
 const getDevice = asyncHandler(async (req, res) => {
-    const did = req.query.did // Getting the id from the url
-    const { didBody } = req.body
-    // const { didFromBody } = req.body // Getting the data from the body
-    const query = `SELECT * FROM devices WHERE DID='${did}';`
+    // const { didBody } = req.body
+    // console.log(didBody)
+    // const did = req.query.did
+
+    const uid = req.query.uid
+    const query = `SELECT * FROM devices WHERE UID='${uid}';`
+
     try {
         var request = new sql.Request()
         const result = await request.query(query)
