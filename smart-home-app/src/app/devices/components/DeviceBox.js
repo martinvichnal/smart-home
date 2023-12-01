@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import setDeviceData from "@/lib/setDeviceData"
+import axios from "axios"
 
 /*
 got device prop:
@@ -33,7 +34,7 @@ function parseDeviceDataString(deviceDataString) {
             type,
             min: Number(min),
             max: Number(max),
-            value: type === "b" ? Boolean(value) : Number(value),
+            value: type === "b" ? value === "true" : Number(value),
         }
     })
     return deviceData
@@ -49,8 +50,9 @@ function stringifyDeviceData(deviceData) {
     return properties.join("--")
 }
 
-export default function DeviceBox({ device }) {
+export default function DeviceBox({ device, onDeviceChange }) {
     const [values, setValues] = useState(parseDeviceDataString(device.DD))
+    const [fetchData, setFetchData] = useState(false)
 
     useEffect(() => {
         const initialValues = parseDeviceDataString(device.DD)
@@ -59,17 +61,31 @@ export default function DeviceBox({ device }) {
     }, [device.DD])
 
     useEffect(() => {
-        console.log("A value has changed. The current Values are:", values)
-        // console.log(device.DID, values)
-        // SENDING VALUESQ TO THE SERVER
-        console.log(
-            "Sending To database: ",
-            device.DID,
-            stringifyDeviceData(values)
-        )
-        setDeviceData(device.DID, stringifyDeviceData(values))
-        // revalidatePath("/devices", "/page")
+        const updateDeviceData = async () => {
+            const deviceDataString = stringifyDeviceData(values)
+            try {
+                const response = await axios.put(
+                    "http://192.168.0.53:8080/api/devices/device",
+                    {
+                        did: device.DID,
+                        dd: deviceDataString + "--",
+                    }
+                )
+                console.log("Data fetched... ", response)
+                setFetchData(true)
+            } catch (error) {
+                console.log("ERROR - ", error)
+            }
+            setFetchData(false)
+        }
+
+        updateDeviceData()
     }, [values])
+
+    useEffect(() => {
+        console.log("Fetch Data:", fetchData)
+        onDeviceChange(device.DID)
+    }, [fetchData])
 
     // Updating the values object
     const handleInputChange = (variableName, variableNewValue) => {
@@ -106,6 +122,9 @@ export default function DeviceBox({ device }) {
             case "b":
                 return (
                     <div key={name} className="mb-4">
+                        <h1 className="text-sm font-medium">
+                            {values[name].value}
+                        </h1>
                         <label className="text-sm font-medium m-4">
                             {name}
                         </label>

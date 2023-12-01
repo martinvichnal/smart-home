@@ -7,7 +7,7 @@ export default async function getDevice(userID) {
         "Fetching device from:",
         `${process.env.API_SERVER_NAME}/api/devices/device?uid=${userID}`
     )
-    console.log(response)
+    // console.log(response)
     if (!response.ok) throw new Error("The data could not be fetched")
     return response.json()
 }

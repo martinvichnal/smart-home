@@ -32,13 +32,13 @@ export const data = [
     // {
     //     DID: "08659bb5de53e40c48b07ab90b25d29e4",
     //     DN: "Kitchen Switcher Hub",
-    //     DD: "Power-b-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false",
+    //     DD: "Power-b-0-0-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false--",
     //     UID: "d480b324-d6bd-4e05-820f-c807a7a5ed7e",
     // },
     // {
     //     DID: "72ca9db90d31439dbf540c48b07abdb6",
     //     DN: "Bedroom Lamp",
-    //     DD: "pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255",
+    //     DD: "pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255--",
     //     UID: "09c007bd-526b-4d8e-a9b9-96daff857759",
     // },
     // {
@@ -56,7 +56,7 @@ export const data = [
     // {
     //     DID: "a550b29757374abda73c15d29e2cd1e1",
     //     DN: "Smart Thermostat",
-    //     DD: "temperature-n-0-100-24.4--humidity-n-0-100-69.123--state-b-true--battery-n-0-100-24",
+    //     DD: "temperature-n-0-100-24.4--humidity-n-0-100-69.123--state-b-true--battery-n-0-100-24--",
     //     UID: "d480b324-d6bd-4e05-820f-c807a7a5ed7e",
     // },
     // {
@@ -68,7 +68,7 @@ export const data = [
     // {
     //     DID: "f33573d762614e47a0008659bb5de53e",
     //     DN: "Bedroom Switcher Hub",
-    //     DD: "Power-b-true--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true",
+    //     DD: "Power-b-true--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true--",
     //     UID: "09c007bd-526b-4d8e-a9b9-96daff857759",
     // },
 ]
