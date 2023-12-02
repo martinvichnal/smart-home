@@ -5,12 +5,12 @@ metadata:
   labels:
     app: iot
 spec:
+  storageClassName: openebs-hostpath
   accessModes:
-    - ReadWriteMany
-  volumeMode: Filesystem
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 2Gi
+      storage: 20Gi
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -68,7 +68,7 @@ spec:
         - name: MSSQL_SA_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: mssql-secret-iot
+              name: mssql-secret
               key: SA_PASSWORD 
         volumeMounts:
         - name: mssqldb
@@ -94,4 +94,4 @@ spec:
     app: iot
   type: LoadBalancer
   externalIPs:
-    - 207.180.220.41
+    - 38.242.236.7

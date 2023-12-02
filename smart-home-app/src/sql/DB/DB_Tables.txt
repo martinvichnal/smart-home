@@ -1,0 +1,44 @@
+CREATE TABLE dbo.devices (
+  DID varchar(128) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+  DN varchar(128) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+  DD varchar(1024) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+  UID varchar(128) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+  PRIMARY KEY CLUSTERED (DID)
+    WITH (
+      PAD_INDEX = OFF, IGNORE_DUP_KEY = OFF, STATISTICS_NORECOMPUTE = OFF,
+      ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+)
+ON [PRIMARY]
+GO
+
+CREATE TABLE dbo.users (
+  UID varchar(128) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+  PRIMARY KEY CLUSTERED (UID)
+    WITH (
+      PAD_INDEX = OFF, IGNORE_DUP_KEY = OFF, STATISTICS_NORECOMPUTE = OFF,
+      ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+)
+ON [PRIMARY]
+GO
+
+
+
+/* Data for the 'dbo.users' table  (Records 1 - 2) */
+INSERT INTO dbo.users (UID)
+VALUES 
+  (N'09c007bd-526b-4d8e-a9b9-96daff857759'),
+  (N'd480b324-d6bd-4e05-820f-c807a7a5ed7e')
+GO
+
+/* Data for the 'dbo.devices' table  (Records 1 - 6) */
+
+INSERT INTO dbo.devices (DID, DN, DD, UID)
+VALUES 
+  (N'08659bb5de53e40c48b07ab90b25d29e4', N'Kitchen Switcher Hub', N'Power-b-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false', N'd480b324-d6bd-4e05-820f-c807a7a5ed7e'),
+  (N'72ca9db90d31439dbf540c48b07abdb6', N'Bedroom Lamp', N'pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255', N'09c007bd-526b-4d8e-a9b9-96daff857759'),
+  (N'89c44c3dbab948faa265ecd787743f15', N'Smart Door Lock', N'locked-b-false--battery-n-0-100-96', N'09c007bd-526b-4d8e-a9b9-96daff857759'),
+  (N'a550b29757374abda73c15d29e2cd1e1', N'Smart Thermostat', N'temperature-n-0-100-24.4--humidity-n-0-100-69.123--state-b-true--battery-n-0-100-24', N'd480b324-d6bd-4e05-820f-c807a7a5ed7e'),
+  (N'f33573d762614e47a0008659bb5de53e', N'Bedroom Switcher Hub', N'Power-b-true--Computer-b-true--Lamp-b-true--Fan-b-false--TV-b-false--Speaker-b-true', N'09c007bd-526b-4d8e-a9b9-96daff857759'),
+  (N'undefined', N'undefined', N'undefined', N'undefined')
+GO
+

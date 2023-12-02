@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: smart-home-api-server
+  name: smart-home-api-server
+  namespace: iot
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: smart-home-api-server
+  sessionAffinity: None
+  externalIPs:
+  - 158.220.110.116
+  type: LoadBalancer
