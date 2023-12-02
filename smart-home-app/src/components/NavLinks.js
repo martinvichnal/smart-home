@@ -14,7 +14,7 @@ export default function NavLinks() {
     const links = [
         { name: "Home", href: "/" },
         { name: "Devices", href: `/devices` },
-        { name: "Testing", href: "/tester" },
+        { name: "Testing", href: "/testing" },
         { name: "Settings", href: "/" },
         {
             name: "API / Users",
