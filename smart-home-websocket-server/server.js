@@ -15,23 +15,24 @@ const io = new Server(httpServer, {
 
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id)
-    socket.on("join_room", (roomId) => {
-        socket.join(roomId)
-        console.log(`user with id-${socket.id} joined room - ${roomId}`)
+
+    // Handle incomming messages between devices and server
+    socket.on("deviceMessage", (message) => {
+        console.log(`Received data from device ${socket.id}: %s`, message)
+
+        // Forward the message to all web clients
+        io.sockets.emit("webMessage", message)
     })
 
-    socket.on("send_msg", (data) => {
-        console.log(data, "DATA")
-        //This will send a message to a specific room ID
-        socket.to(data.roomId).emit("receive_msg", data)
+    // Handle incomming messages from web clients and server
+    socket.on("webMessage", (message) => {
+        console.log(`Received data from web client ${socket.id}: %s`, message)
+
+        // Forward the message to the device
+        socket.broadcast.emit("deviceMessage", message)
     })
 
-    socket.on("clientMessage", (message) => {
-        console.log("Received: %s", message)
-        // Emit the message to all connected clients
-        io.sockets.emit("serverMessage", message)
-    })
-
+    // Handle client disconnection
     socket.on("disconnect", () => {
         console.log("A user disconnected:", socket.id)
     })
@@ -42,3 +43,21 @@ const PORT = 5000
 httpServer.listen(PORT, () => {
     console.log(`Socket.io server is running on port ${PORT}`)
 })
+
+// websocket on events:
+// connection - from client to server
+// disconnect - from client to server
+// deviceMessage - between devices and server
+// webMessage - between web clients and server
+
+// Room Implementation
+// socket.on("join_room", (roomId) => {
+//     socket.join(roomId)
+//     console.log(`user with id-${socket.id} joined room - ${roomId}`)
+// })
+
+// socket.on("send_msg", (data) => {
+//     console.log(data, "DATA")
+//     //This will send a message to a specific room ID
+//     socket.to(data.roomId).emit("receive_msg", data)
+// })
