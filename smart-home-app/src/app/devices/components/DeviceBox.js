@@ -63,7 +63,6 @@ function stringifyDeviceData(deviceData) {
 
 export default function DeviceBox({ device, onDeviceChange }) {
     const [values, setValues] = useState(parseDeviceDataString(device.DD))
-    const [fetchData, setFetchData] = useState(false)
 
     useEffect(() => {
         const initialValues = parseDeviceDataString(device.DD)
@@ -76,27 +75,26 @@ export default function DeviceBox({ device, onDeviceChange }) {
             const deviceDataString = stringifyDeviceData(values)
             try {
                 const response = await axios.put(
-                    "http://192.168.0.53:8080/api/devices/deviceDID",
+                    `${process.env.API_SERVER_NAME}/api/devices/deviceDID`,
                     {
                         did: device.DID,
                         dd: deviceDataString + "--",
                     }
                 )
                 console.log("Data fetched... ", response)
-                setFetchData(true)
+                // Notify the parent component that the device data has been updated
+                if (onDeviceChange) {
+                    onDeviceChange(device.DID)
+                }
             } catch (error) {
                 console.log("ERROR - ", error)
+                setValues(parseDeviceDataString(device.DD))
+                alert("Failed to update device data")
             }
-            setFetchData(false)
         }
 
         updateDeviceData()
     }, [values])
-
-    useEffect(() => {
-        console.log("Fetch Data:", fetchData)
-        onDeviceChange(device.DID)
-    }, [fetchData])
 
     // Updating the values object
     const handleInputChange = (variableName, variableNewValue) => {

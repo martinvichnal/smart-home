@@ -14,7 +14,7 @@ export default function Devices() {
 
     useEffect(() => {
         // fetchDevices()
-        const intervalId = setInterval(fetchDevices, 5000) // Fetch every 5 seconds
+        const intervalId = setInterval(fetchDevices, 1000) // Fetch every 5 seconds
 
         // Clean up the interval on unmount
         return () => clearInterval(intervalId)

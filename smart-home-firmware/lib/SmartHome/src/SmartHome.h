@@ -22,16 +22,16 @@
 class Variable
 {
 public:
-    Variable(int pin, const String name, char type, int minValue, int maxValue, int value);
+    Variable(int pin, String name, char type, int minValue, int maxValue, int value);
 
-    String toString() const;
+    String toString();
 
-    int getPin() const;
-    String getName() const;
-    char getType() const;
-    int getMinValue() const;
-    int getMaxValue() const;
-    int getValue() const;
+    int getPin();
+    String getName();
+    char getType();
+    int getMinValue();
+    int getMaxValue();
+    int getValue();
 
     void setValue(int newValue);
 
@@ -47,20 +47,20 @@ private:
 class SmartHome
 {
 public:
-    SmartHome(const String homeName, const String homeID, const String userID, const String serverUrl);
+    SmartHome(String homeName, String homeID, String userID, String serverUrl);
 
-    String getHomeID() const;
-    String getHomeName() const;
-    String getUserID() const;
-    String getServerUrl() const;
+    String getHomeID();
+    String getHomeName();
+    String getUserID();
+    String getServerUrl();
 
-    void addVariableNumber(int pin, const String name, int minValue, int maxValue, int value);
-    void addVariableBool(int pin, const String name, int value);
+    void addVariableNumber(int pin, String name, int minValue, int maxValue, int value);
+    void addVariableBool(int pin, String name, int value);
 
-    int getVariableValue(const String name);
+    int getVariableValue(String name);
 
-    void setVariableValue(const String name, int value);
-    void setVariableValue(const String name, char type, int minValue, int maxValue, int value);
+    void setVariableValue(String name, int value);
+    void setVariableValue(String name, char type, int minValue, int maxValue, int value);
 
     void validateHome();
 
@@ -80,9 +80,9 @@ private:
     unsigned long previousPushMillis = 0;
     unsigned long previousPullMillis = 0;
 
-    void sendToServer(const String data);
-    String fetchDataFromServer(const String parameter);
-    bool processReceivedData(const String data);
+    void sendToServer(String data);
+    String fetchDataFromServer(String parameter);
+    bool processReceivedData(String data);
 };
 
 #endif

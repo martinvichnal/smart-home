@@ -27,14 +27,14 @@
     \_/    \_______/|__/      |__/ \_______/|_______/ |__/ \_______/
 
 */
-Variable::Variable(int pin, const String name, char type, int minValue, int maxValue, int value)
+Variable::Variable(int pin, String name, char type, int minValue, int maxValue, int value)
     : pin(pin), name(name), type(type), minValue(minValue), maxValue(maxValue), value(value) {}
 
 /**
  * @brief Stringify the variable to send to the database
  * @return String
  */
-String Variable::toString() const
+String Variable::toString()
 {
     String n = getName();
     String t = String(getType());
@@ -64,7 +64,7 @@ String Variable::toString() const
  * @brief Getting variable pin number
  * @return int
  */
-int Variable::getPin() const
+int Variable::getPin()
 {
     return pin;
 }
@@ -73,7 +73,7 @@ int Variable::getPin() const
  * @brief Getting variable name
  * @return String
  */
-String Variable::getName() const
+String Variable::getName()
 {
     return name;
 }
@@ -82,7 +82,7 @@ String Variable::getName() const
  * @brief Getting variable type
  * @return char
  */
-char Variable::getType() const
+char Variable::getType()
 {
     return type;
 }
@@ -91,7 +91,7 @@ char Variable::getType() const
  * @brief Getting variable minimum value
  * @return int
  */
-int Variable::getMinValue() const
+int Variable::getMinValue()
 {
     return minValue;
 }
@@ -100,7 +100,7 @@ int Variable::getMinValue() const
  * @brief Getting variable maximum value
  * @return int
  */
-int Variable::getMaxValue() const
+int Variable::getMaxValue()
 {
     return maxValue;
 }
@@ -109,7 +109,7 @@ int Variable::getMaxValue() const
  * @brief Getting variable value
  * @return int
  */
-int Variable::getValue() const
+int Variable::getValue()
 {
     return value;
 }
@@ -145,14 +145,14 @@ void Variable::setValue(int newValue)
  * @param userID
  * @param serverUrl
  */
-SmartHome::SmartHome(const String homeName, const String homeID, const String userID, const String serverUrl)
+SmartHome::SmartHome(String homeName, String homeID, String userID, String serverUrl)
     : homeName(homeName), homeID(homeID), userID(userID), serverUrl(serverUrl) {}
 
 /**
  * @brief Getting home ID
  * @return String
  */
-String SmartHome::getHomeID() const
+String SmartHome::getHomeID()
 {
     return homeID;
 }
@@ -161,7 +161,7 @@ String SmartHome::getHomeID() const
  * @brief Getting home name
  * @return String
  */
-String SmartHome::getHomeName() const
+String SmartHome::getHomeName()
 {
     return homeName;
 }
@@ -170,7 +170,7 @@ String SmartHome::getHomeName() const
  * @brief Getting the home's owner userID
  * @return String
  */
-String SmartHome::getUserID() const
+String SmartHome::getUserID()
 {
     return userID;
 }
@@ -179,7 +179,7 @@ String SmartHome::getUserID() const
  * @brief Getting serverUrl where the API is fetched from
  * @return String
  */
-String SmartHome::getServerUrl() const
+String SmartHome::getServerUrl()
 {
     return serverUrl;
 }
@@ -192,7 +192,7 @@ String SmartHome::getServerUrl() const
  * @param maxValue
  * @param value
  */
-void SmartHome::addVariableNumber(int pin, const String name, int minValue, int maxValue, int value)
+void SmartHome::addVariableNumber(int pin, String name, int minValue, int maxValue, int value)
 {
     variables.push_back(Variable(pin, name, 'n', minValue, maxValue, value));
 }
@@ -203,7 +203,7 @@ void SmartHome::addVariableNumber(int pin, const String name, int minValue, int 
  * @param name
  * @param value
  */
-void SmartHome::addVariableBool(int pin, const String name, int value)
+void SmartHome::addVariableBool(int pin, String name, int value)
 {
     variables.push_back(Variable(pin, name, 'b', 0, 0, value));
 }
@@ -213,10 +213,10 @@ void SmartHome::addVariableBool(int pin, const String name, int value)
  * @param name
  * @return int
  */
-int SmartHome::getVariableValue(const String variableName)
+int SmartHome::getVariableValue(String variableName)
 {
     auto variableIt = std::find_if(
-        variables.begin(), variables.end(), [variableName](const Variable variable)
+        variables.begin(), variables.end(), [variableName](Variable variable)
         { return variable.getName() == variableName; });
 
     if (variableIt != variables.end())
@@ -236,11 +236,11 @@ int SmartHome::getVariableValue(const String variableName)
  * @param name
  * @param value
  */
-void SmartHome::setVariableValue(const String name, int value)
+void SmartHome::setVariableValue(String name, int value)
 {
     auto variableIt = std::find_if(
         variables.begin(), variables.end(),
-        [name](const Variable variable)
+        [name](Variable variable)
         { return variable.getName() == name; });
 
     if (variableIt != variables.end())
@@ -263,11 +263,11 @@ void SmartHome::setVariableValue(const String name, int value)
 //  * @param variableMaxValue
 //  * @param variableValue
 //  */
-// void SmartHome::setVariableValue(const String name, char type, int minValue, int maxValue, int value)
+// void SmartHome::setVariableValue(String name, char type, int minValue, int maxValue, int value)
 // {
 //     auto variableIt = std::find_if(
 //         variables.begin(), variables.end(),
-//         [name](const Variable variable)
+//         [name](Variable variable)
 //         { return variable.getName() == name; });
 
 //     if (variableIt != variables.end())
@@ -292,7 +292,7 @@ void SmartHome::validateHome()
         Serial.println("VALIDATE - Device not found in database... Creating new device in database");
 
         String data;
-        for (const auto variable : variables)
+        for (auto variable : variables)
         {
             data += variable.toString() + "--";
         }
@@ -336,7 +336,7 @@ void SmartHome::validateHome()
 void SmartHome::push()
 {
     String data;
-    for (const auto variable : variables)
+    for (auto variable : variables)
     {
         data += variable.toString() + "--";
     }
@@ -354,7 +354,7 @@ void SmartHome::push(int interval)
     if (millis() - previousPushMillis >= interval)
     {
         String data;
-        for (const auto variable : variables)
+        for (auto variable : variables)
         {
             data += variable.toString() + "--";
         }
@@ -386,7 +386,7 @@ void SmartHome::pull(int interval)
  * @todo Implement HTTP POST request
  * @param data - device data
  */
-void SmartHome::sendToServer(const String data)
+void SmartHome::sendToServer(String data)
 {
     Serial.println("SEND - Sending data to server");
 
@@ -422,7 +422,7 @@ void SmartHome::sendToServer(const String data)
  * @return String - received data from the server
  * @param parameter - device ID
  */
-String SmartHome::fetchDataFromServer(const String parameter)
+String SmartHome::fetchDataFromServer(String parameter)
 {
     Serial.println("FETCH - Fetching data from server");
 
@@ -454,7 +454,7 @@ String SmartHome::fetchDataFromServer(const String parameter)
  * @return true - if data is processed or has something in it.
  * @return false - if data is empty
  */
-bool SmartHome::processReceivedData(const String data)
+bool SmartHome::processReceivedData(String data)
 {
     Serial.println();
     DynamicJsonDocument jsonData(2048);
@@ -471,7 +471,7 @@ bool SmartHome::processReceivedData(const String data)
             }
             else
             {
-                for (const auto device : devices)
+                for (auto device : devices)
                 {
                     String deviceId = device["DID"].as<String>();
                     String deviceName = device["DN"].as<String>();
@@ -525,12 +525,10 @@ bool SmartHome::processReceivedData(const String data)
 
                         // Set the variables using the setVariableValue function
                         // setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
-                        setVariableValue(variableName, variableValue);
-                        Serial.println(variableValue);
-
                         Serial.println();
                         Serial.println("Parsed variable data:");
                         Serial.println("Variable name: " + variableName + ", Variable type: " + variableType + ", Variable min value: " + String(variableMinValue) + ", Variable max value: " + String(variableMaxValue) + ", Variable value: " + String(variableValue));
+                        setVariableValue(variableName, variableValue);
 
                         // "--"
                         startIndex = endIndex + 2;
