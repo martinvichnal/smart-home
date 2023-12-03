@@ -39,7 +39,7 @@ void setup()
   connectToWifi();
 
   // Setup WebSocket connection
-  webSocket.begin("ws://192.168.0.53:", 5000);
+  webSocket.begin("192.168.0.53", 5000);
 
   // Setup WebSocket event handler
   webSocket.onEvent(webSocketEvent);

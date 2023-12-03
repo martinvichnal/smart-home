@@ -1,17 +1,20 @@
-const http = require("http")
-const { Server } = require("socket.io")
-const cors = require("cors")
+// const http = require("http")
+// const { Server } = require("socket.io")
+// const cors = require("cors")
+// const httpServer = http.createServer()
+// const io = new Server(httpServer, {
+//     cors: {
+//         origin: "http://localhost:3000",
+//         methods: ["GET", "POST"],
+//         allowedHeaders: ["my-custom-header"],
+//         credentials: true,
+//     },
+// })
 
-const httpServer = http.createServer()
-
-const io = new Server(httpServer, {
-    cors: {
-        origin: "http://localhost:3000", // Replace with your frontend URL
-        methods: ["GET", "POST"],
-        allowedHeaders: ["my-custom-header"],
-        credentials: true,
-    },
-})
+const express = require("express")
+const app = express()
+const server = require("http").Server(app)
+const io = require("socket.io")(server)
 
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id)
@@ -41,7 +44,7 @@ io.on("connection", (socket) => {
 
 // const PORT = process.env.PORT || 3001
 const PORT = 5000
-httpServer.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Socket.io server is running on port ${PORT}`)
 })
 
