@@ -22,6 +22,7 @@ io.on("connection", (socket) => {
 
         // Forward the message to all web clients
         io.sockets.emit("webMessage", message)
+        io.sockets.emit("serverMessage", message)
     })
 
     // Handle incomming messages from web clients and server

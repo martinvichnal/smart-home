@@ -4,7 +4,7 @@ import { io } from "socket.io-client"
 
 export default function Testing() {
     useEffect(() => {
-        const socket = io("ws://192.168.0.53:5000") // updated server address and port
+        const socket = io("ws://192.168.0.53:5000")
         socket.on("connect", () => {
             console.log("connected")
         })

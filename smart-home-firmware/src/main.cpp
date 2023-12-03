@@ -18,21 +18,18 @@
 #include <SmartHome.h>
 #include <FastLED.h>
 #include "config.h"
-#include <SocketIoClient.h>
+#include <WebSocketsClient.h>
 
 // Fucntions
 void connectToWifi(); // Connecting to WiFi
 
 // Socket.IO functions
-SocketIoClient webSocket;
+WebSocketsClient webSocket;
 
-void wsConnect(const char *payload, size_t length);
-void wsEvent(const char *payload, size_t length);
-void weServerMessage(const char *payload, size_t length);
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
 
-char host[] = "http://192.168.0.53";                    // Socket.IO Server Address
-int port = 5000;                                 // Socket.IO Port Address
-char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
+char webSocketServerAddress[] = "192.168.0.53"; // Socket.IO Server Address
+int webSocketServerPort = 5000;                 // Socket.IO Port Address
 
 // SETUP
 void setup()
@@ -41,35 +38,51 @@ void setup()
   delay(1000);
   connectToWifi();
 
-  // Connect to socket.io server
-  webSocket.begin(host, port, path);
-  // Setup 'on' listen events
-  webSocket.on("connection", wsConnect);
-  webSocket.on("serverMessage", wsEvent);
-  // webSocket.on("status", wsStatus);
-  // webSocket.on("state_change_request", wsChange);
+  // Setup WebSocket connection
+  webSocket.begin("ws://192.168.0.53:", 5000);
+
+  // Setup WebSocket event handler
+  webSocket.onEvent(webSocketEvent);
 }
 
+int count = 0;
 // LOOP
 void loop()
 {
   webSocket.loop();
-  EVERY_N_SECONDS(1)
+  count++;
+  if (count == 18000)
   {
-    webSocket.emit("clientMessage", "esp32");
+    count = 0;
+
+    // Format message as JSON
+    String message = "{\"type\":\"deviceMessage\",\"data\":\"Hello from esp32!\"}";
+
+    // Send message
+    webSocket.sendTXT(message);
   }
 }
 
-void wsConnect(const char *payload, size_t length)
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
-  Serial.println("Connected to Socket.IO server");
-  webSocket.emit("join", "esp32");
-}
+  switch (type)
+  {
+  case WStype_DISCONNECTED:
+    Serial.printf("[WSc] Disconnected!\n");
+    break;
+  case WStype_CONNECTED:
+    Serial.printf("[WSc] Connected to url: %s\n", payload);
+    break;
+  case WStype_TEXT:
+    Serial.printf("[WSc] get text: %s\n", payload);
 
-void wsEvent(const char *payload, size_t length)
-{
-  Serial.print("got message: ");
-  Serial.println(payload);
+    // If the incoming message is "serverMessage", do something
+    if (strcmp((char *)payload, "serverMessage") == 0)
+    {
+      Serial.println("Message received!" + String((char *)payload));
+    }
+    break;
+  }
 }
 
 void connectToWifi()
