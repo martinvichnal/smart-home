@@ -6,7 +6,7 @@ export default function Testing() {
     const [socket, setSocket] = useState(null)
 
     useEffect(() => {
-        const socketIO = io("ws://192.168.0.53:5000")
+        const socketIO = io("ws://158.220.110.116:5000")
         setSocket(socketIO)
 
         socketIO.on("connect", () => {
@@ -17,6 +17,7 @@ export default function Testing() {
         })
         socketIO.on("webMessage", (message) => {
             console.log("A message appeared on deviceMessage: " + message)
+            console.log(message)
         })
         socketIO.on("deviceMessage", (message) => {
             console.log("A message appeared on deviceMessage: " + message)

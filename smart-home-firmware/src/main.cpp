@@ -3,8 +3,8 @@
  * @author Martin Vichnál
  * @page https://github.com/martinvichnal/smart-home
  * @brief ESP32 firmware for my SmartHome project using my custom library
- * @version v1.0.0
- * @date 2023-11-22
+ * @version v1.1.1.1
+ * @date 2023-12-03
  *
  * @copyright Copyright (c) 2023
  *
@@ -13,23 +13,20 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-// #include <WebSocketsClient.h>
-// #include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 #include <SmartHome.h>
 #include <FastLED.h>
 #include "config.h"
+
 #include <WebSocketsClient.h>
+#include <SocketIOclient.h>
 
 // Fucntions
 void connectToWifi(); // Connecting to WiFi
+void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length);
 
 // Socket.IO functions
-WebSocketsClient webSocket;
-
-void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
-
-char webSocketServerAddress[] = "192.168.0.53"; // Socket.IO Server Address
-int webSocketServerPort = 5000;                 // Socket.IO Port Address
+SocketIOclient ws;
 
 // SETUP
 void setup()
@@ -38,50 +35,45 @@ void setup()
   delay(1000);
   connectToWifi();
 
-  // Setup WebSocket connection
-  webSocket.begin("192.168.0.53", 5000);
-
-  // Setup WebSocket event handler
-  webSocket.onEvent(webSocketEvent);
+  // server address, port and URL
+  ws.begin(webSocketServerAddress, webSocketServerPort, "/socket.io/?EIO=4");
+  // event handler
+  ws.onEvent(webSocketEvents);
 }
 
 int count = 0;
+unsigned long messageTimestamp = 0;
+
 // LOOP
 void loop()
 {
-  webSocket.loop();
-  count++;
-  if (count == 18000)
+  ws.loop();
+
+  uint64_t now = millis();
+
+  if (now - messageTimestamp > 2000)
   {
-    count = 0;
+    messageTimestamp = now;
+    // Creating json object
+    DynamicJsonDocument doc(1024);
+    JsonArray array = doc.to<JsonArray>();
 
-    // Format message as JSON
-    String message = "{\"type\":\"deviceMessage\",\"data\":\"Hello from esp32!\"}";
+    // add event name
+    array.add("deviceMessage");
 
-    // Send message
-    webSocket.sendTXT(message);
-  }
-}
+    // add payload (parameters) for the event
+    JsonObject param1 = array.createNestedObject();
+    param1["now"] = (uint32_t)now;
 
-void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
-{
-  switch (type)
-  {
-  case WStype_DISCONNECTED:
-    Serial.printf("[WSc] Disconnected!\n");
-    break;
-  case WStype_CONNECTED:
-    Serial.printf("[WSc] Connected to url: %s\n", payload);
-    break;
-  case WStype_TEXT:
-    Serial.printf("[WSc] get text: %s\n", payload);
+    // JSON to String (serializion)
+    String output;
+    serializeJson(doc, output);
 
-    // If the incoming message is "serverMessage", do something
-    if (strcmp((char *)payload, "serverMessage") == 0)
-    {
-      Serial.println("Message received!" + String((char *)payload));
-    }
-    break;
+    // Send event
+    ws.sendEVENT(output);
+
+    // Print JSON for debugging
+    Serial.println(output);
   }
 }
 
@@ -100,4 +92,32 @@ void connectToWifi()
   Serial.println("\nConnected to the WiFi network");
   Serial.print("Local ESP32 IP: ");
   Serial.println(WiFi.localIP());
+}
+
+void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length)
+{
+  switch (type)
+  {
+  case sIOtype_DISCONNECT:
+    Serial.printf("[IOc] Disconnected!\n");
+    break;
+  case sIOtype_CONNECT:
+    Serial.printf("[IOc] Connected to url: %s\n", payload);
+
+    // join default namespace (no auto join in Socket.IO V3)
+    ws.send(sIOtype_CONNECT, "/");
+    break;
+  case sIOtype_EVENT:
+    Serial.printf("[IOc] get event: %s\n", payload);
+    // [IOc] get event: ["webMessage","device data"]
+    // [IOc] get event: ["deviceMessage","web data"]
+    // If the incoming message is "fromServer", do something
+    if (strcmp((char *)payload, "deviceMessage") == 0)
+    {
+      // Do something when the "fromServer" message is received
+      Serial.println("fromServer");
+    }
+    // Serial.println(payload);
+    break;
+  }
 }
