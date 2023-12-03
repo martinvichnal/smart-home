@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "2"
+  labels:
+    app: smart-home-websocket-server
+  name: smart-home-websocket-server
+  namespace: iot
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: smart-home-websocket-server
+  template:
+    metadata:
+      labels:
+        app: smart-home-websocket-server
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: smart-home-websocket-server
+        image: loxtop/smart-home-websocket-server:1.0.2
+        imagePullPolicy: Always
+        name: smart-home-websocket-server
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 700m  
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
