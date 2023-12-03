@@ -20,9 +20,7 @@ echo "*****************************************************"
 
   echo "*****************************************************"
   echo "Building smart-home-api-server:"$REV_TAG
-
-  cd smart-home-api-server
-  
+ 
   ## Version TAG
   envsubst < Deployment-template.yaml > Deployment.yaml
 
@@ -34,8 +32,6 @@ echo "*****************************************************"
   kubectl apply -n iot -f Deployment.yaml
   kubectl apply -n iot -f Service.yaml
   kubectl rollout restart Deployment -n iot smart-home-api-server
-
-  cd ..
 
 
 ## kubectl exec -it my-deployment-6ccf8c4db4-wxdgq  -- bash
