@@ -1,25 +1,53 @@
 "use client"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { io } from "socket.io-client"
 
 export default function Testing() {
+    const [socket, setSocket] = useState(null)
+
     useEffect(() => {
-        const socket = io("ws://192.168.0.53:5000")
-        socket.on("connect", () => {
+        const socketIO = io("ws://192.168.0.53:5000")
+        setSocket(socketIO)
+
+        socketIO.on("connect", () => {
             console.log("connected")
         })
-        socket.on("disconnect", () => {
+        socketIO.on("disconnect", () => {
             console.log("disconnected")
         })
-        socket.on("message", (message) => {
-            console.log(message)
+        socketIO.on("webMessage", (message) => {
+            console.log("A message appeared on deviceMessage: " + message)
         })
-        socket.emit("clientMessage", "Hello world!")
-
-        socket.on("serverMessage", (message) => {
-            console.log(message)
+        socketIO.on("deviceMessage", (message) => {
+            console.log("A message appeared on deviceMessage: " + message)
         })
     }, [])
 
-    return <button id="sendButton">Send message</button>
+    const sendMessage = (messageType, message) => {
+        if (socket) {
+            socket.emit(messageType, message)
+        }
+    }
+
+    return (
+        <div>
+            <div>
+                <button
+                    id="sendWebMessage"
+                    onClick={() => sendMessage("webMessage", "web data")}
+                >
+                    Send Web Message
+                </button>
+            </div>
+            <br />
+            <div>
+                <button
+                    id="sendDeviceMessage"
+                    onClick={() => sendMessage("deviceMessage", "device data")}
+                >
+                    Send Device Message
+                </button>
+            </div>
+        </div>
+    )
 }

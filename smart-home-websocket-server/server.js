@@ -14,25 +14,34 @@
 const express = require("express")
 const app = express()
 const server = require("http").Server(app)
-const io = require("socket.io")(server)
+const io = require("socket.io")(server, {
+    cors: {
+        origin: "*",
+    },
+})
 
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id)
 
     // Handle incomming messages between devices and server
     socket.on("deviceMessage", (message) => {
-        console.log(`Received data from device ${socket.id}: %s`, message)
+        console.log(
+            `Received data from device ${socket.id}. Sending message to webMessage: %s`,
+            message
+        )
 
-        // Forward the message to all web clients
-        io.sockets.emit("webMessage", message)
-        io.sockets.emit("serverMessage", message)
+        // Forward the message to all web clients except the sender
+        socket.broadcast.emit("webMessage", message)
     })
 
     // Handle incomming messages from web clients and server
     socket.on("webMessage", (message) => {
-        console.log(`Received data from web client ${socket.id}: %s`, message)
+        console.log(
+            `Received data from web client ${socket.id}. Sending message to deviceMessage: %s`,
+            message
+        )
 
-        // Forward the message to the device
+        // Forward the message to the device except the sender
         socket.broadcast.emit("deviceMessage", message)
     })
 
