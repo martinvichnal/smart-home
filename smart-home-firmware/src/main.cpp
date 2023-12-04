@@ -22,11 +22,30 @@
 #include <SocketIOclient.h>
 
 SmartHome desk("Desk", "123", "1124", "http://158.220.110.116:8080");
-void parseVariableData(); // Parsing data from variables for clear code
+SmartHome therm("Thermostat", "456", "1124", "http://158.220.110.116:8080");
+SmartHome bed("Bed", "789", "1124", "http://158.220.110.116:8080");
+
 // Desk variables:
 bool deskLamp = 0;
 int deskLampBrightness = 0; // 0 - 255
 bool deskMonitor = 0;
+
+// Thermostat:
+int thermostatTemperature = 0; // 0 - 100
+int thermostatHumidity = 0;    // 0 - 100
+bool thermostatPower = 0;
+
+// Bed:
+bool bedLamp = 0;
+int bedLampBrightness = 0; // 0 - 255
+
+void parseVariableData();  // Parsing data from variables for clear code
+void setGlobalVariables(); // Setting variables to values to fetch them to the server
+
+#define NUM_LEDS 10
+#define DATA_PIN 5
+
+CRGB leds[NUM_LEDS];
 
 /*
 Functions declarations
@@ -56,17 +75,28 @@ void setup()
   delay(1000);
   connectToWifi();
 
+  FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS); // GRB ordering is typical
+  FastLED.setBrightness(100);
+
   desk.addVariableBool(13, "deskLamp", deskLamp);
   desk.addVariableNumber(14, "deskLampBrightness", 0, 255, deskLampBrightness);
   desk.addVariableBool(15, "deskMonitor", deskMonitor);
 
-  // desk.validateHome();
-  // parseVariableData();
-  desk.prepareWebSocketData();
+  therm.addVariableNumber(16, "thermostatTemperature", 0, 100, thermostatTemperature);
+  therm.addVariableNumber(17, "thermostatHumidity", 0, 100, thermostatHumidity);
+  therm.addVariableBool(18, "thermostatPower", thermostatPower);
 
-  // server address, port and URL
+  bed.addVariableBool(19, "bedLamp", bedLamp);
+  bed.addVariableNumber(20, "bedLampBrightness", 0, 255, bedLampBrightness);
+
+  // Validate homes
+  desk.validateHome();
+  therm.validateHome();
+  bed.validateHome();
+  parseVariableData();
+
+  // WebSocket initialization
   ws.begin(webSocketServerAddress, webSocketServerPort, "/socket.io/?EIO=4");
-  // event handler
   ws.onEvent(webSocketEvents);
 }
 
@@ -89,21 +119,38 @@ const unsigned long interval = 5000; // Delay interval in milliseconds
 void loop()
 {
   ws.loop();
+  parseVariableData();
+  setGlobalVariables();
+
+  fill_solid(leds, 10, CRGB(255, 0, 0));
+
+  if (deskLamp)
+    FastLED.setBrightness(deskLampBrightness);
+  else
+    FastLED.setBrightness(0);
+
+  FastLED.show();
 
   if (millis() - previousMillis >= interval)
   {
     previousMillis = millis();
 
-    deskLamp = random(0, 2);
-    deskLampBrightness = random(0, 256);
     deskMonitor = random(0, 2);
-    desk.setVariableValue("deskLamp", deskLamp);
-    desk.setVariableValue("deskLampBrightness", deskLampBrightness);
-    desk.setVariableValue("deskMonitor", deskMonitor);
-    parseVariableData();
+    thermostatTemperature = random(0, 101);
+    thermostatHumidity = random(0, 101);
+    thermostatPower = random(0, 2);
 
-    String data = desk.prepareWebSocketData();
-    ws.sendEVENT(data);
+    bedLamp = random(0, 2);
+    bedLampBrightness = random(0, 256);
+    setGlobalVariables();
+
+    String dataDesk = desk.prepareWebSocketData();
+    String dataTherm = therm.prepareWebSocketData();
+    String dataBed = bed.prepareWebSocketData();
+
+    ws.sendEVENT(dataDesk);
+    ws.sendEVENT(dataTherm);
+    ws.sendEVENT(dataBed);
   }
 }
 
@@ -145,19 +192,46 @@ void parseVariableData()
   deskLamp = desk.getVariableValue("deskLamp");
   deskLampBrightness = desk.getVariableValue("deskLampBrightness");
   deskMonitor = desk.getVariableValue("deskMonitor");
+
+  thermostatTemperature = therm.getVariableValue("thermostatTemperature");
+  thermostatHumidity = therm.getVariableValue("thermostatHumidity");
+  thermostatPower = therm.getVariableValue("thermostatPower");
+
+  bedLamp = bed.getVariableValue("bedLamp");
+  bedLampBrightness = bed.getVariableValue("bedLampBrightness");
+}
+
+
+void setGlobalVariables()
+{
+  // Setting global variables to values to fetch them to the server
+  desk.setVariableValue("deskLamp", deskLamp);
+  desk.setVariableValue("deskLampBrightness", deskLampBrightness);
+  desk.setVariableValue("deskMonitor", deskMonitor);
+
+  therm.setVariableValue("thermostatTemperature", thermostatTemperature);
+  therm.setVariableValue("thermostatHumidity", thermostatHumidity);
+  therm.setVariableValue("thermostatPower", thermostatPower);
+
+  bed.setVariableValue("bedLamp", bedLamp);
+  bed.setVariableValue("bedLampBrightness", bedLampBrightness);
 }
 
 /**
- * @brief Handling the event from WebSocket server
- * @param payload
- * @param length
+ * @brief Handles a WebSocket event.
+ *
+ * This function is responsible for deserializing the payload of a WebSocket event into
+ * the event name and event data. It then performs specific actions based on the event name.
+ *
+ * @param payload The payload of the WebSocket event.
+ * @param length The length of the payload.
  */
 void handleWebSocketEvent(uint8_t *payload, size_t length)
 {
   // Deserializing EVENT payload into EVENT NAME and EVENT DATA
   char *sptr = NULL;
   int id = strtol((char *)payload, &sptr, 10);
-  Serial.printf("[IOc] get event: %s id: %d\n", payload, id);
+  Serial.printf("WS - [IOc] get event: %s id: %d\n", payload, id);
   if (id)
   {
     payload = (uint8_t *)sptr;
@@ -166,87 +240,92 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
   DeserializationError errorDoc = deserializeJson(doc, payload, length);
   if (errorDoc)
   {
-    Serial.print(F("deserializeJson() failed: "));
+    Serial.print(F("WS - deserializeJson() failed: "));
     Serial.println(errorDoc.c_str());
     return;
   }
 
   String eventName = doc[0];
-  Serial.printf("[IOc] event name: %s\n", eventName.c_str());
-  Serial.printf("[IOc] payload: %s\n", doc[1].as<String>().c_str());
+  Serial.printf("WS - [IOc] event name: %s\n", eventName.c_str());
+  Serial.printf("WS - [IOc] payload: %s\n", doc[1].as<String>().c_str());
 
   if (eventName == "deviceMessage")
   {
+    Serial.println("WS - Deserialization of deviceMessage");
+    Serial.println(doc[1].as<String>());
     DynamicJsonDocument jsonData(1024);
-    DeserializationError errorJson = deserializeJson(jsonData, doc[1]);
+    DeserializationError errorJson = deserializeJson(jsonData, doc[1].as<String>());
     if (errorJson)
     {
-      Serial.print(F("deserializeJson() failed: "));
+      Serial.print(F("WS - deserializeJson() failed: "));
       Serial.println(errorJson.c_str());
       return;
     }
+
     JsonObject device = jsonData[0];
-    String deviceName = device["DN"].as<String>();
+    String deviceName = device["dn"].as<String>();
+    Serial.printf("WS - [IOc] device name: %s\n", deviceName.c_str());
 
     if (deviceName == "Desk")
     {
       desk.processDeviceData(doc[1]);
     }
+    else if (deviceName == "Bed")
+    {
+      bed.processDeviceData(doc[1]);
+    }
+    else if (deviceName == "Thermostat")
+    {
+      therm.processDeviceData(doc[1]);
+    }
     else
     {
-      Serial.println("Unknown device name");
+      Serial.println("WS - Unknown device name");
       return;
     }
-    // else if (deviceName == "Bed")
-    // {
-    //   // bed.processReceivedData(doc[1]);
-    // }
-    // else if (deviceName == "Thermostat")
-    // {
-    //   // therm.processReceivedData(doc[1]);
-    // }
   }
   else
   {
-    Serial.println("Unknown event name");
+    Serial.println("WS - Unknown event name");
   }
 }
 
 /**
- * @brief WebSocket event handler
- * @param type
- * @param payload
- * @param length
+ * @brief Handles WebSocket events.
+ *
+ * This function is called when a WebSocket event occurs. It processes different types of events
+ * such as disconnection, connection, events, acknowledgments, errors, binary events, and binary acknowledgments.
+ *
+ * @param type The type of the WebSocket event.
+ * @param payload The payload data associated with the event.
+ * @param length The length of the payload data.
  */
 void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length)
 {
   switch (type)
   {
   case sIOtype_DISCONNECT:
-    Serial.printf("[IOc] Disconnected!\n");
+    Serial.printf("WS - [IOc] Disconnected!\n");
     break;
   case sIOtype_CONNECT:
-    Serial.printf("[IOc] Connected to url: %s\n", payload);
-
-    // join default namespace (no auto join in Socket.IO V3)
+    Serial.printf("WS - [IOc] Connected to url: %s\n", payload);
     ws.send(sIOtype_CONNECT, "/");
     break;
   case sIOtype_EVENT:
-    Serial.printf("[IOc] get event: %s\n", payload);
+    Serial.printf("WS - [IOc] get event: %s\n", payload);
     handleWebSocketEvent(payload, length);
     break;
-    break;
   case sIOtype_ACK:
-    Serial.printf("[IOc] get ack: %u\n", length);
+    Serial.printf("WS - [IOc] get ack: %u\n", length);
     break;
   case sIOtype_ERROR:
-    Serial.printf("[IOc] get error: %u\n", length);
+    Serial.printf("WS - [IOc] get error: %u\n", length);
     break;
   case sIOtype_BINARY_EVENT:
-    Serial.printf("[IOc] get binary: %u\n", length);
+    Serial.printf("WS - [IOc] get binary: %u\n", length);
     break;
   case sIOtype_BINARY_ACK:
-    Serial.printf("[IOc] get binary ack: %u\n", length);
+    Serial.printf("WS - [IOc] get binary ack: %u\n", length);
     break;
   }
 }

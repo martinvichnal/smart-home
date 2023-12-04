@@ -218,7 +218,7 @@ int SmartHome::getVariableValue(String variableName)
     }
     else
     {
-        Serial.println("ERROR! - Variable not found: " + variableName);
+        Serial.println("getVariableValue - ERROR! - Variable not found: " + variableName);
         return -1; // Or another value indicating an error
     }
 }
@@ -256,7 +256,7 @@ void SmartHome::setVariableValue(String name, int value)
     }
     else
     {
-        Serial.println("ERROR! - Variable not found: " + name);
+        Serial.println("setVariableValue - ERROR! - Variable not found: " + name);
     }
 }
 
@@ -294,7 +294,7 @@ void SmartHome::validateHome()
         }
         else
         {
-            Serial.printf("ERROR! VALIDATE - HTTP POST failed, response code: %d\n", httpResponseCode);
+            Serial.printf("VALIDATE - ERROR! - HTTP POST failed, response code: %d\n", httpResponseCode);
         }
 
         http.end();
@@ -359,7 +359,7 @@ void SmartHome::push(int interval)
             data += variable.toString() + "--";
         }
         Serial.println();
-        Serial.print("Sending data to server: ");
+        Serial.print("PUSH - Sending data to server: ");
         Serial.println(data);
         Serial.println();
         sendToServer(data);
@@ -375,7 +375,7 @@ void SmartHome::push(int interval)
  */
 void SmartHome::sendToServer(String data)
 {
-    Serial.println("SEND - Sending data to server");
+    Serial.println("API SEND - Sending data to server");
 
     HTTPClient http;
     http.begin(serverUrl + "/api/devices/deviceDID");
@@ -387,16 +387,16 @@ void SmartHome::sendToServer(String data)
     String uid = getUserID();
 
     String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
-    Serial.println("SEND - " + serverUrl + "/api/devices" + " body: " + jsonOutput);
+    Serial.println("API SEND - " + serverUrl + "/api/devices" + " body: " + jsonOutput);
 
     int httpResponseCode = http.PUT(String(jsonOutput));
     if (httpResponseCode > 0)
     {
-        Serial.printf("SEND - HTTP PUT success, response code: %d\n", httpResponseCode);
+        Serial.printf("API SEND - HTTP PUT success, response code: %d\n", httpResponseCode);
     }
     else
     {
-        Serial.printf("ERROR! SEND - HTTP PUT failed, response code: %d\n", httpResponseCode);
+        Serial.printf("API SEND - ERROR! - HTTP PUT failed, response code: %d\n", httpResponseCode);
     }
 
     http.end();
@@ -411,27 +411,26 @@ void SmartHome::sendToServer(String data)
  */
 String SmartHome::fetchDataFromServer(String parameter)
 {
-    Serial.println("FETCH - Fetching data from server");
+    Serial.println("API FETCH - Fetching data from server");
 
     HTTPClient http;
     http.begin(serverUrl + "/api/devices/deviceDID?did=" + parameter);
-    Serial.println("Requesting on: " + serverUrl + "/api/devices/deviceDID?did=" + parameter);
+    Serial.println("API FETCH - Requesting on: " + serverUrl + "/api/devices/deviceDID?did=" + parameter);
 
     int httpResponseCode = http.GET();
     if (httpResponseCode == HTTP_CODE_OK)
     {
         String response = http.getString();
-        Serial.printf("FETCH - HTTP GET success, response: %s\n", response.c_str());
+        Serial.printf("API FETCH - HTTP GET success, response: %s\n", response.c_str());
         return response;
     }
     else
     {
-        Serial.printf("ERROR! FETCH - HTTP GET failed, response code: %d\n", httpResponseCode);
+        Serial.printf("API FETCH - ERROR! - HTTP GET failed, response code: %d\n", httpResponseCode);
         return "";
     }
 
     http.end();
-    Serial.println();
 }
 
 /**
@@ -459,16 +458,16 @@ bool SmartHome::processDeviceData(String data)
             {
                 for (auto device : devices)
                 {
-                    String deviceId = device["DID"].as<String>();
-                    String deviceName = device["DN"].as<String>();
-                    String deviceData = device["DD"].as<String>();
-                    String userId = device["UID"].as<String>();
+                    String deviceId = device["did"].as<String>();
+                    String deviceName = device["dn"].as<String>();
+                    String deviceData = device["dd"].as<String>();
+                    String userId = device["uid"].as<String>();
 
-                    Serial.println("Parsed data from server:");
-                    Serial.println("Device ID: " + deviceId);
-                    Serial.println("Device name: " + deviceName);
-                    Serial.println("Device data: " + deviceData);
-                    Serial.println("User ID: " + userId);
+                    Serial.println("processDeviceData - Parsed data from server:");
+                    Serial.println("processDeviceData - Device ID: " + deviceId);
+                    Serial.println("processDeviceData - Device name: " + deviceName);
+                    Serial.println("processDeviceData - Device data: " + deviceData);
+                    Serial.println("processDeviceData - User ID: " + userId);
 
                     // TODO: process device data into their corresponding variables
                     int startIndex = 0;
@@ -485,55 +484,65 @@ bool SmartHome::processDeviceData(String data)
                         String variableData = deviceData.substring(startIndex, endIndex);
 
                         // Split the variable data using the '-' delimiter
+                        // GETTING VARIABLE NAME
                         int dashIndex = variableData.indexOf("-");
                         String variableName = variableData.substring(0, dashIndex);
                         variableData.remove(0, dashIndex + 1);
-
+                        // GETTING VARIABLE TYPE
                         dashIndex = variableData.indexOf("-");
                         String variableType = variableData.substring(0, dashIndex);
                         variableData.remove(0, dashIndex + 1);
-
-                        // Check for variable type. The two (number and boolean) variables are different in data structure
-                        int variableMinValue = 0;
-                        int variableMaxValue = 0;
-                        if (variableType.charAt(0) == 'n')
+                        // GETTING VARIABLE MIN VALUE
+                        dashIndex = variableData.indexOf("-");
+                        int variableMinValue = variableData.substring(0, dashIndex).toInt();
+                        variableData.remove(0, dashIndex + 1);
+                        // GETTING VARIABLE MAX VALUE
+                        dashIndex = variableData.indexOf("-");
+                        int variableMaxValue = variableData.substring(0, dashIndex).toInt();
+                        variableData.remove(0, dashIndex + 1);
+                        // GETTING VARIABLE VALUE
+                        int variableValue = 0;
+                        if (variableType == "b")
                         {
-                            dashIndex = variableData.indexOf("-");
-                            variableMinValue = variableData.substring(0, dashIndex).toInt();
-                            variableData.remove(0, dashIndex + 1);
-
-                            dashIndex = variableData.indexOf("-");
-                            variableMaxValue = variableData.substring(0, dashIndex).toInt();
-                            variableData.remove(0, dashIndex + 1);
+                            if(variableData == "false" || variableData == "0")
+                            {
+                                variableValue = 0;
+                            }
+                            else if(variableData == "true" || variableData == "1")
+                            {
+                                variableValue = 1;
+                            }
                         }
-
-                        int variableValue = variableData.toInt();
+                        else if (variableType == "n")
+                        {
+                            variableValue = variableData.toInt();
+                        }
+                        
+                        
 
                         // Set the variables using the setVariableValue function
                         // setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
-                        Serial.println();
-                        Serial.println("Parsed variable data:");
-                        Serial.println("Variable name: " + variableName + ", Variable type: " + variableType + ", Variable min value: " + String(variableMinValue) + ", Variable max value: " + String(variableMaxValue) + ", Variable value: " + String(variableValue));
+                        Serial.println("processDeviceData - Parsed variable data:");
+                        Serial.println("processDeviceData - Variable name: " + variableName + ", Variable type: " + variableType + ", Variable min value: " + String(variableMinValue) + ", Variable max value: " + String(variableMaxValue) + ", Variable value: " + String(variableValue));
                         // Set variable
                         setVariableValue(variableName, variableValue);
-                        // Update SQL server using API
-                        push();
 
-                        // "--"
-                        startIndex = endIndex + 2;
+                        startIndex = endIndex + 2; // "--"
                     }
                 }
+                // Update SQL server using API
+                // push();
                 return true;
             }
         }
         else
         {
-            Serial.println("ERROR! - Invalid JSON format");
+            Serial.println("processDeviceData - ERROR! - Invalid JSON format");
         }
     }
     else
     {
-        Serial.println("ERROR! - Deserialization error: " + String(error.c_str()));
+        Serial.println("processDeviceData - ERROR! - Deserialization error: " + String(error.c_str()));
     }
     Serial.println();
 }
@@ -548,7 +557,7 @@ String SmartHome::prepareWebSocketData()
     // Creating json object
     DynamicJsonDocument doc(1024);
     JsonArray array = doc.to<JsonArray>();
-    
+
     String data;
     String output;
 
