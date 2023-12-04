@@ -1,8 +1,9 @@
 import axios from "axios"
 
 export default async function setDeviceData(deviceID, data) {
+    console.log(`Update database: ${deviceID} device data: ${data}`)
     axios
-        .put(`${process.env.API_SERVER_NAME}/api/devices/device`, {
+        .put(`${process.env.API_SERVER_NAME}/api/devices/deviceDID`, {
             did: deviceID,
             dd: data + "--",
         })

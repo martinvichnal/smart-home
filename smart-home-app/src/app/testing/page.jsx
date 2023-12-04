@@ -3,6 +3,7 @@
 import { io } from "socket.io-client"
 import { user } from "@/lib/placeholder-user"
 import getDevice from "@/lib/getDevice"
+import setDeviceData from "@/lib/setDeviceData"
 import DeviceBox from "@/app/testing/components/DeviceBox"
 import { Suspense, useEffect, useState } from "react"
 
@@ -10,7 +11,7 @@ export default function Testing() {
     const [socket, setSocket] = useState(null)
     const [devices, setDevices] = useState([])
 
-    const setDeviceData = (deviceID, deviceData) => {
+    const setDevicesState = (deviceID, deviceData) => {
         setDevices((prevDevices) => {
             const deviceIndex = prevDevices.findIndex(
                 (device) => device.did === deviceID
@@ -50,10 +51,9 @@ export default function Testing() {
         })
         socketIO.on("webMessage", (message) => {
             const messageParse = JSON.parse(message)
-            console.log("webMessage received")
-            console.log(messageParse)
 
-            setDeviceData(messageParse.did, messageParse)
+            setDeviceData(messageParse.did, messageParse.dd) // Send data to SQL
+            setDevicesState(messageParse.did, messageParse)
         })
     }, [])
 
@@ -67,7 +67,7 @@ export default function Testing() {
                 uid: user.uid,
             },
         ]
-        setDeviceData(deviceID, changedDeviceObj[0])
+        // setDeviceData(deviceID, changedDeviceObj[0])
         if (socket) {
             console.log(
                 "sending to webMessage" + JSON.stringify(changedDeviceObj)

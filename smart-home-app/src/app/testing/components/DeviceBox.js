@@ -75,6 +75,16 @@ export default function DeviceBox({ device, onDeviceChange }) {
         )
     }, [device])
 
+    // Sending all data with useEffect when the values object changes
+    useEffect(() => {
+        // Updating the device data in the database
+        setDeviceData(device.did, stringifyDeviceData(values))
+        // Sending the new values to the server via WebSocket
+        if (onDeviceChange) {
+            onDeviceChange(device.did, stringifyDeviceData(values))
+        }
+    }, [values])
+
     // Updating the values object when the user changes the input
     const handleInputChange = (variableName, variableNewValue) => {
         // Add new value to the values object
@@ -85,11 +95,6 @@ export default function DeviceBox({ device, onDeviceChange }) {
                 value: variableNewValue,
             },
         }))
-        // Sending the new values to the server via WebSocket
-        if (onDeviceChange) {
-            // setDeviceData(device.did, stringifyDeviceData(values))
-            onDeviceChange(device.did, stringifyDeviceData(values))
-        }
     }
 
     // Rendering out the corresponding component based on the variable type
