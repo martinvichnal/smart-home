@@ -62,42 +62,32 @@ function stringifyDeviceData(deviceData) {
 }
 
 export default function DeviceBox({ device, onDeviceChange }) {
-    const [values, setValues] = useState(parseDeviceDataString(device.DD))
+    const [values, setValues] = useState(parseDeviceDataString(device.dd))
 
+    // Checking for device change. - If the device changes, we need to update the values object
+    // Only triggered when the device prop changes from page.jsx
     useEffect(() => {
-        const initialValues = parseDeviceDataString(device.DD)
-        setValues(initialValues)
-        console.log("Initial Values:", initialValues)
-    }, [device.DD])
+        const parseDevice = parseDeviceDataString(device.dd)
+        setValues(parseDevice)
+        console.log(
+            "Device values has changed... Updating the values state:",
+            parseDevice
+        )
+    }, [device])
 
+    // Sending all data with useEffect when the values object changes
     useEffect(() => {
-        const updateDeviceData = async () => {
-            const deviceDataString = stringifyDeviceData(values)
-            try {
-                const response = await axios.put(
-                    `${process.env.API_SERVER_NAME}/api/devices/deviceDID`,
-                    {
-                        did: device.DID,
-                        dd: deviceDataString + "--",
-                    }
-                )
-                console.log("Data fetched... ", response)
-                // Notify the parent component that the device data has been updated
-                if (onDeviceChange) {
-                    onDeviceChange(device.DID)
-                }
-            } catch (error) {
-                console.log("ERROR - ", error)
-                setValues(parseDeviceDataString(device.DD))
-                alert("Failed to update device data")
-            }
+        // Updating the device data in the database
+        setDeviceData(device.did, stringifyDeviceData(values))
+        // Sending the new values to the server via WebSocket
+        if (onDeviceChange) {
+            onDeviceChange(device.did, stringifyDeviceData(values))
         }
-
-        updateDeviceData()
     }, [values])
 
-    // Updating the values object
+    // Updating the values object when the user changes the input
     const handleInputChange = (variableName, variableNewValue) => {
+        // Add new value to the values object
         setValues((prevValues) => ({
             ...prevValues,
             [variableName]: {
@@ -166,10 +156,10 @@ export default function DeviceBox({ device, onDeviceChange }) {
     return (
         <div className="m-6 p-6 bg-white border border-gray-200 rounded-lg shadow-lg">
             <h2 className="pb-8 text-2xl font-bold tracking-tight text-gray-900">
-                {device.DN}
+                {device.dn}
             </h2>
             <div className="grid grid-cols-2 gap-8 justify-start">
-                {device.DD.split("--").map((item) => {
+                {device.dd.split("--").map((item) => {
                     if (item) {
                         const [name, type, min, max, value] = item.split("-")
                         return renderComponents(name, type, min, max, value)

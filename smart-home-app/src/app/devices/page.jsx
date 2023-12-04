@@ -1,11 +1,33 @@
 "use client"
+
+import { io } from "socket.io-client"
 import { user } from "@/lib/placeholder-user"
-import DeviceBox from "@/app/devices/components/DeviceBox"
 import getDevice from "@/lib/getDevice"
+import setDeviceData from "@/lib/setDeviceData"
+import DeviceBox from "@/app/testing/components/DeviceBox"
 import { Suspense, useEffect, useState } from "react"
 
 export default function Devices() {
+    const [socket, setSocket] = useState(null)
     const [devices, setDevices] = useState([])
+
+    const setDevicesState = (deviceID, deviceData) => {
+        setDevices((prevDevices) => {
+            const deviceIndex = prevDevices.findIndex(
+                (device) => device.did === deviceID
+            )
+
+            if (deviceIndex !== -1) {
+                // Update the existing device data
+                const updatedDevices = [...prevDevices]
+                updatedDevices[deviceIndex] = deviceData
+                return updatedDevices
+            } else {
+                // Add the new device to the state
+                return [...prevDevices, deviceData]
+            }
+        })
+    }
 
     const fetchDevices = async () => {
         const newDevices = await getDevice(user.uid)
@@ -14,16 +36,46 @@ export default function Devices() {
     }
 
     useEffect(() => {
+        // Fetch devices from server for initial render
         fetchDevices()
-        // const intervalId = setInterval(fetchDevices, 1000) // Fetch every 5 seconds
 
-        // // Clean up the interval on unmount
-        // return () => clearInterval(intervalId)
+        // Connect to WebSocket and specify event handlers
+        const socketIO = io("ws://158.220.110.116:5000")
+        setSocket(socketIO)
+
+        socketIO.on("connect", () => {
+            console.log("connected")
+        })
+        socketIO.on("disconnect", () => {
+            console.log("disconnected")
+        })
+        socketIO.on("webMessage", (message) => {
+            const messageParse = JSON.parse(message)
+
+            setDeviceData(messageParse.did, messageParse.dd) // Send data to SQL
+            setDevicesState(messageParse.did, messageParse)
+        })
     }, [])
 
-    const handleDeviceChange = (deviceID) => {
-        console.log(deviceID + " is changed... Fetching new devices...")
-        fetchDevices()
+    const handleDeviceChange = (deviceID, deviceData) => {
+        console.log(deviceID + " is changed " + deviceData)
+        const changedDeviceObj = [
+            {
+                did: deviceID,
+                dn: devices.find((device) => device.did === deviceID).dn,
+                dd: deviceData,
+                uid: user.uid,
+            },
+        ]
+        // setDeviceData(deviceID, changedDeviceObj[0])
+        if (socket) {
+            console.log(
+                "sending to webMessage" + JSON.stringify(changedDeviceObj)
+            )
+            socket.emit("webMessage", changedDeviceObj)
+        } else {
+            console.log("socket is not alive")
+        }
     }
 
     return (
@@ -44,17 +96,19 @@ export default function Devices() {
 }
 
 /*
-    const [devices, setDevices] = useState([]);
+Websocket objet: 
+{
+    "did": "123",
+    "dn": "Desk",
+    "dd": "deskLamp-b-0-0-1--deskLampBrightness-n-0-255-34--deskMonitor-b-0-0-0--",
+    "uid": "1124"
+}
 
-    useEffect(() => {
-        const socket = new WebSocket('ws://your-server-url');
-
-        socket.onmessage = (event) => {
-            const newDevices = JSON.parse(event.data);
-            setDevices(newDevices);
-        };
-
-        // Clean up the WebSocket connection on unmount
-        return () => socket.close();
-    }, []);
+SQL object:
+{
+    "did": "123",
+    "dn": "Desk",
+    "dd": "deskLamp-b-0-0-false--deskLampBrightness-n-0-255-58--deskMonitor-b-0-0-false--",
+    "uid": "1124"
+}
 */
