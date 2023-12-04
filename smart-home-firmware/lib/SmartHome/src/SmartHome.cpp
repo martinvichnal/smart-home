@@ -3,14 +3,12 @@
  * @author Martin Vichnál
  * @page https://github.com/martinvichnal/smart-home
  * @brief Custom ESP32 library for my SmartHome project
- * @version v1.0.0
- * @date 2023-11-22
+ * @version v1.2.0.0
+ * @date 2023-12-04
  *
  * @copyright Copyright (c) 2023
  *
  * @note This library is not finished yet
- * @todo Implement HTTP GET and POST requests
- * @todo Implement validation check for maximum and minimum values and types
  */
 
 #include "SmartHome.h"
@@ -27,12 +25,22 @@
     \_/    \_______/|__/      |__/ \_______/|_______/ |__/ \_______/
 
 */
+/**
+ * @brief Constructor
+ * @param pin Variable physical pin
+ * @param name Variable name
+ * @param type Variable type
+ * @param minValue Minimum variable value
+ * @param maxValue Maximum variable value
+ * @param value Variable value
+ * @todo Implement validation check for maximum and minimum values and types
+ */
 Variable::Variable(int pin, String name, char type, int minValue, int maxValue, int value)
     : pin(pin), name(name), type(type), minValue(minValue), maxValue(maxValue), value(value) {}
 
 /**
  * @brief Stringify the variable to send to the database
- * @return String
+ * @return String - variable string
  */
 String Variable::toString()
 {
@@ -41,28 +49,13 @@ String Variable::toString()
     String min = String(getMinValue());
     String max = String(getMaxValue());
     String v = String(getValue());
-    // if(t == "b")
-    // {
-    //     if (getValue() == 0)
-    //     {
-    //         String v = "false";
-    //     }
-    //     else if (getValue() == 1)
-    //     {
-    //         String v = "true";
-    //     }
-    // }
-    // else if(t == "n")
-    // {
-    //     String v = String(getValue());
-    // }
 
     return n + "-" + t + "-" + min + "-" + max + "-" + v;
 }
 
 /**
  * @brief Getting variable pin number
- * @return int
+ * @return int - variable pin number
  */
 int Variable::getPin()
 {
@@ -71,7 +64,7 @@ int Variable::getPin()
 
 /**
  * @brief Getting variable name
- * @return String
+ * @return String - variable name
  */
 String Variable::getName()
 {
@@ -80,7 +73,7 @@ String Variable::getName()
 
 /**
  * @brief Getting variable type
- * @return char
+ * @return char - 'n' for number, 'b' for boolean
  */
 char Variable::getType()
 {
@@ -89,7 +82,7 @@ char Variable::getType()
 
 /**
  * @brief Getting variable minimum value
- * @return int
+ * @return int - variable minimum value
  */
 int Variable::getMinValue()
 {
@@ -98,7 +91,7 @@ int Variable::getMinValue()
 
 /**
  * @brief Getting variable maximum value
- * @return int
+ * @return int - variable maximum value
  */
 int Variable::getMaxValue()
 {
@@ -107,7 +100,7 @@ int Variable::getMaxValue()
 
 /**
  * @brief Getting variable value
- * @return int
+ * @return int - variable value
  */
 int Variable::getValue()
 {
@@ -116,8 +109,7 @@ int Variable::getValue()
 
 /**
  * @brief Setting variable value
- * @todo Add validation for other types
- * @param newValue
+ * @param newValue new variable value
  */
 void Variable::setValue(int newValue)
 {
@@ -140,17 +132,17 @@ void Variable::setValue(int newValue)
 
 /**
  * @brief Constructor
- * @param homeName
- * @param homeID
- * @param userID
- * @param serverUrl
+ * @param homeName Home name
+ * @param homeID Home ID
+ * @param userID User ID
+ * @param serverUrl Server URL
  */
 SmartHome::SmartHome(String homeName, String homeID, String userID, String serverUrl)
     : homeName(homeName), homeID(homeID), userID(userID), serverUrl(serverUrl) {}
 
 /**
  * @brief Getting home ID
- * @return String
+ * @return String - homeID
  */
 String SmartHome::getHomeID()
 {
@@ -159,7 +151,7 @@ String SmartHome::getHomeID()
 
 /**
  * @brief Getting home name
- * @return String
+ * @return String - homeName
  */
 String SmartHome::getHomeName()
 {
@@ -168,7 +160,7 @@ String SmartHome::getHomeName()
 
 /**
  * @brief Getting the home's owner userID
- * @return String
+ * @return String - userID
  */
 String SmartHome::getUserID()
 {
@@ -177,7 +169,7 @@ String SmartHome::getUserID()
 
 /**
  * @brief Getting serverUrl where the API is fetched from
- * @return String
+ * @return String - serverUrl
  */
 String SmartHome::getServerUrl()
 {
@@ -186,11 +178,11 @@ String SmartHome::getServerUrl()
 
 /**
  * @brief Adding new NUMBER variable to the SmartHome class
- * @param pin
- * @param name
- * @param minValue
- * @param maxValue
- * @param value
+ * @param pin Variable physical pin
+ * @param name Variable name
+ * @param minValue Minimum variable value
+ * @param maxValue Maximum variable value
+ * @param value Variable value
  */
 void SmartHome::addVariableNumber(int pin, String name, int minValue, int maxValue, int value)
 {
@@ -199,9 +191,9 @@ void SmartHome::addVariableNumber(int pin, String name, int minValue, int maxVal
 
 /**
  * @brief Adding new BOOLEAN variable to the SmartHome class
- * @param pin
- * @param name
- * @param value
+ * @param pin Variable physical pin
+ * @param name Variable name
+ * @param value Variable value
  */
 void SmartHome::addVariableBool(int pin, String name, int value)
 {
@@ -210,8 +202,8 @@ void SmartHome::addVariableBool(int pin, String name, int value)
 
 /**
  * @brief Get the variable vale by name
- * @param name
- * @return int
+ * @param name Variable name
+ * @return int - Variable value
  */
 int SmartHome::getVariableValue(String variableName)
 {
@@ -232,9 +224,23 @@ int SmartHome::getVariableValue(String variableName)
 }
 
 /**
+ * @brief Get the variables string
+ * @return String - DeviceData string
+ */
+String SmartHome::getVariablesString()
+{
+    String data;
+    for (auto variable : variables)
+    {
+        data += variable.toString() + "--";
+    }
+    return data;
+}
+
+/**
  * @brief Setting variable value by name
- * @param name
- * @param value
+ * @param name - Variable name
+ * @param value - Variable value
  */
 void SmartHome::setVariableValue(String name, int value)
 {
@@ -254,40 +260,12 @@ void SmartHome::setVariableValue(String name, int value)
     }
 }
 
-// /**
-//  * @brief Setting variable value by name
-//  *
-//  * @param variableName
-//  * @param variableType
-//  * @param variableMinValue
-//  * @param variableMaxValue
-//  * @param variableValue
-//  */
-// void SmartHome::setVariableValue(String name, char type, int minValue, int maxValue, int value)
-// {
-//     auto variableIt = std::find_if(
-//         variables.begin(), variables.end(),
-//         [name](Variable variable)
-//         { return variable.getName() == name; });
-
-//     if (variableIt != variables.end())
-//     {
-//         // Update the value of the found variable
-//         variableIt->setValue(value);
-//     }
-//     else
-//     {
-//         Serial.println("ERROR! - Variable not found: " + name);
-//     }
-// }
-
 /**
  * @brief Validating home. Checks if the device is already in the database. If not it creates a new device in the database
- * @todo Improve efficiency
  */
 void SmartHome::validateHome()
 {
-    if (processReceivedData(fetchDataFromServer(getHomeID())) == false)
+    if (processDeviceData(fetchDataFromServer(getHomeID())) == false)
     {
         Serial.println("VALIDATE - Device not found in database... Creating new device in database");
 
@@ -327,11 +305,33 @@ void SmartHome::validateHome()
         Serial.println("VALIDATE - Device found in database... Proceedeing startup and fetching data from server");
     }
 
-    processReceivedData(fetchDataFromServer(getHomeID()));
+    // Not needed because the beggining of the if it is 100% that calls this.
+    // processDeviceData(fetchDataFromServer(getHomeID()));
 }
 
 /**
- * @brief Pushing data to the server
+ * @brief Pulling data from the server and setting the variables to the received data
+ */
+void SmartHome::pull()
+{
+    processDeviceData(fetchDataFromServer(getHomeID()));
+}
+
+/**
+ * @brief Pulling data from the server within a specific interval (in milliseconds)
+ * @param interval in ms
+ */
+void SmartHome::pull(int interval)
+{
+    if (millis() - previousPullMillis >= interval)
+    {
+        processDeviceData(fetchDataFromServer(getHomeID()));
+        previousPullMillis = millis();
+    }
+}
+
+/**
+ * @brief Creates DD string and pushes to the server
  */
 void SmartHome::push()
 {
@@ -346,7 +346,7 @@ void SmartHome::push()
 }
 
 /**
- * @brief Pushing data to the server
+ * @brief Creates DD string and pushes to the server within a specific interval (in milliseconds)
  * @param interval in ms
  */
 void SmartHome::push(int interval)
@@ -369,22 +369,9 @@ void SmartHome::push(int interval)
 }
 
 /**
- * @brief Pulling data from the server within a specific interval (in milliseconds)
- * @param interval in ms
- */
-void SmartHome::pull(int interval)
-{
-    if (millis() - previousPullMillis >= interval)
-    {
-        processReceivedData(fetchDataFromServer(getHomeID()));
-        previousPullMillis = millis();
-    }
-}
-
-/**
  * @brief Sending data to the server with HTTP API POST request (not implemented yet)
  * @todo Implement HTTP POST request
- * @param data - device data
+ * @param data device data
  */
 void SmartHome::sendToServer(String data)
 {
@@ -400,7 +387,7 @@ void SmartHome::sendToServer(String data)
     String uid = getUserID();
 
     String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
-    Serial.println("SEND - " + serverUrl + "/api/devices" + " body: " + jsonOutput);    
+    Serial.println("SEND - " + serverUrl + "/api/devices" + " body: " + jsonOutput);
 
     int httpResponseCode = http.PUT(String(jsonOutput));
     if (httpResponseCode > 0)
@@ -420,7 +407,7 @@ void SmartHome::sendToServer(String data)
  * @brief Fetching data from the server with HTTP API GET request
  * @todo Implement HTTP GET request
  * @return String - received data from the server
- * @param parameter - device ID
+ * @param parameter device ID
  */
 String SmartHome::fetchDataFromServer(String parameter)
 {
@@ -448,16 +435,15 @@ String SmartHome::fetchDataFromServer(String parameter)
 }
 
 /**
- * @brief Processing received data from the server (not implemented yet)
- * @todo Process device data into their corresponding variables
- * @param data
+ * @brief Process device data into their corresponding variables and pushes it to the SQL server using API
+ * @param data DeviceData string
  * @return true - if data is processed or has something in it.
  * @return false - if data is empty
  */
-bool SmartHome::processReceivedData(String data)
+bool SmartHome::processDeviceData(String data)
 {
     Serial.println();
-    DynamicJsonDocument jsonData(2048);
+    DynamicJsonDocument jsonData(1024);
     DeserializationError error = deserializeJson(jsonData, data);
 
     if (error == DeserializationError::Ok)
@@ -528,7 +514,10 @@ bool SmartHome::processReceivedData(String data)
                         Serial.println();
                         Serial.println("Parsed variable data:");
                         Serial.println("Variable name: " + variableName + ", Variable type: " + variableType + ", Variable min value: " + String(variableMinValue) + ", Variable max value: " + String(variableMaxValue) + ", Variable value: " + String(variableValue));
+                        // Set variable
                         setVariableValue(variableName, variableValue);
+                        // Update SQL server using API
+                        push();
 
                         // "--"
                         startIndex = endIndex + 2;
@@ -547,4 +536,38 @@ bool SmartHome::processReceivedData(String data)
         Serial.println("ERROR! - Deserialization error: " + String(error.c_str()));
     }
     Serial.println();
+}
+
+/**
+ * @brief Prepareing Device Message for WebSocket server
+ *
+ * @return String - Stringified JSON
+ */
+String SmartHome::prepareWebSocketData()
+{
+    // Creating json object
+    DynamicJsonDocument doc(1024);
+    JsonArray array = doc.to<JsonArray>();
+    
+    String data;
+    String output;
+
+    for (auto variable : variables)
+    {
+        data += variable.toString() + "--";
+    }
+
+    String did = getHomeID();
+    String dn = getHomeName();
+    String dd = data;
+    String uid = getUserID();
+
+    String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
+
+    array.add("deviceMessage"); // WS event name
+    array.add(jsonOutput);      // WS event data
+    serializeJson(doc, output);
+
+    Serial.println("WS - Creating JSON for WebSocket: " + output);
+    return output;
 }

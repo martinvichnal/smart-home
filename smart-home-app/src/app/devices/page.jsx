@@ -9,15 +9,16 @@ export default function Devices() {
 
     const fetchDevices = async () => {
         const newDevices = await getDevice(user.uid)
+        console.log(newDevices)
         setDevices(newDevices)
     }
 
     useEffect(() => {
-        // fetchDevices()
-        const intervalId = setInterval(fetchDevices, 1000) // Fetch every 5 seconds
+        fetchDevices()
+        // const intervalId = setInterval(fetchDevices, 1000) // Fetch every 5 seconds
 
-        // Clean up the interval on unmount
-        return () => clearInterval(intervalId)
+        // // Clean up the interval on unmount
+        // return () => clearInterval(intervalId)
     }, [])
 
     const handleDeviceChange = (deviceID) => {
