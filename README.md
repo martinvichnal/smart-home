@@ -199,30 +199,49 @@ Structure of the data communication example in JSON format:
 ```JSON
 [
   {
-    "DID": "05b31779-14ee-4233-8c9a-2749e81d3ccb",
-    "DN": "Thermostat",
-    "DD": "temperature-n-0-100-34--humidity-n-0-100-61--state-b-0-0-0--",
-    "UID": "80ff2b60-bf4b-42fe-8de4-d21734a393c8"
+    "did": "1111",
+    "dn": "Led",
+    "dd": "ledVariable-b-0-0-true--",
+    "uid": "1124"
   },
   {
-    "DID": "08659bb5de53e40c48b07ab90b25d29e4",
-    "DN": "Kitchen Switcher Hub",
-    "DD": "Power-b-false--battery-n-0-100-19.6--Air Conditioner-b-false--Door-b-false--Window-b-false",
-    "UID": "d480b324-d6bd-4e05-820f-c807a7a5ed7e"
+    "did": "123",
+    "dn": "Desk",
+    "dd": "deskLamp-b-0-0-true--deskLampBrightness-n-0-255-20--deskMonitor-b-0-0-true--",
+    "uid": "1124"
   },
   {
-    "DID": "72ca9db90d31439dbf540c48b07abdb6",
-    "DN": "Bedroom Lamp",
-    "DD": "pot-n-0-255--state-b--battery-n-0-100--brightness-n-0-100--hue-n-0-255",
-    "UID": "09c007bd-526b-4d8e-a9b9-96daff857759"
+    "did": "456",
+    "dn": "Thermostat",
+    "dd": "thermostatTemperature-n-0-100-13--thermostatHumidity-n-0-100-31--thermostatPower-b-0-0-true--",
+    "uid": "1124"
   },
   {
-    "DID": "89c44c3dbab948faa265ecd787743f15",
-    "DN": "Smart Door Lock",
-    "DD": "locked-b-false--battery-n-0-100-96",
-    "UID": "09c007bd-526b-4d8e-a9b9-96daff857759"
+    "did": "789",
+    "dn": "Bed",
+    "dd": "bedLamp-b-0-0-false--bedLampBrightness-n-0-255-225--",
+    "uid": "1124"
   }
 ]
+```
+```JSON
+[
+  {
+    "UID": "09c007bd-526b-4d8e-a9b9-96daff857759"
+  },
+  {
+    "UID": "d480b324-d6bd-4e05-820f-c807a7a5ed7e"
+  }
+]
+```
+
+```JavaScript
+export const user = {
+    uid: "1124",
+    uName: "Vichnál Martin",
+    uPhoto: "https://lh3.googleusercontent.com/a/ACg8ocI5cTr4KR7TWUMmnwHdRFaBpEZw6QRUiwtVixPCTQVmuow=s96-c",
+    uIsAuth: true,
+}
 ```
 
 ## IoT Devices (Software of the ESP32)
