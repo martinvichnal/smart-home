@@ -53,8 +53,6 @@ Functions declarations
 void connectToWifi(); // Connecting to WiFi
 void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length);
 void handleWebSocketEvent(uint8_t *payload, size_t length);
-void handleWebSocketPayloadData(String data);
-void sendWebSocketData(String data);
 
 // Socket.IO functions
 SocketIOclient ws;

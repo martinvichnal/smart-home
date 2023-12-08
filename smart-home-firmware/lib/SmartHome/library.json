@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Custom ESP32 library for my SmartHome project",
     "dependencies": {
-        "ArduinoJson": "https://github.com/bblanchon/ArduinoJson"
+        "ArduinoJson": "https://github.com/bblanchon/ArduinoJson",
+        "arduinoWebSockets": "https://github.com/Links2004/arduinoWebSockets"
     }
 }
