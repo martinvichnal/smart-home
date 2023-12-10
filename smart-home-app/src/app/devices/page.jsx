@@ -96,7 +96,7 @@ export default function Devices() {
 }
 
 /*
-Websocket objet: 
+Websocket object: 
 {
     "did": "123",
     "dn": "Desk",
