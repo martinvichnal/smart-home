@@ -112,7 +112,7 @@ unsigned long messageTimestamp = 0;
 |________/ \______/  \______/ |__/
 */
 unsigned long previousMillis = 0;
-const unsigned long interval = 5000; // Delay interval in milliseconds
+const unsigned long interval = 10000; // Delay interval in milliseconds
 
 void loop()
 {

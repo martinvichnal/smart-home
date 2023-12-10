@@ -21,11 +21,18 @@
 #include <WebSocketsClient.h>
 #include <SocketIOclient.h>
 
-SmartHome led("Led", "1111", "1124", "http://158.220.110.116:8080");
+#include "DHT.h"
 
+#define DHTPIN 4
+#define DHTTYPE DHT11 // DHT 11
+
+SmartHome led("Led", "4", "1124", "http://158.220.110.116:8080");
+SmartHome tmp("DHT11", "5", "1124", "http://158.220.110.116:8080");
 
 // Desk variables:
 bool ledVariable = 0;
+int temp = 0;
+int hum = 0;
 
 void parseVariableData();  // Parsing data from variables for clear code
 void setGlobalVariables(); // Setting variables to values to fetch them to the server
@@ -41,6 +48,8 @@ void sendWebSocketData(String data);
 
 // Socket.IO functions
 SocketIOclient ws;
+
+DHT dht(DHTPIN, DHTTYPE);
 
 /*
   /$$$$$$  /$$$$$$$$ /$$$$$$$$ /$$   /$$ /$$$$$$$
@@ -59,11 +68,14 @@ void setup()
   connectToWifi();
 
   pinMode(LED_BUILTIN, OUTPUT);
-
+  dht.begin();
 
   led.addVariableBool(LED_BUILTIN, "ledVariable", ledVariable);
+  tmp.addVariableNumber(1, "temp", 0, 100, temp);
+  tmp.addVariableNumber(0, "hum", 0, 100, hum);
 
   // Validate homes
+  tmp.validateHome();
   led.validateHome();
   parseVariableData();
 
@@ -86,10 +98,11 @@ unsigned long messageTimestamp = 0;
 |________/ \______/  \______/ |__/
 */
 unsigned long previousMillis = 0;
-const unsigned long interval = 10000; // Delay interval in milliseconds
+const unsigned long interval = 2000; // Delay interval in milliseconds
 
 void loop()
 {
+
   ws.loop();
   parseVariableData();
   setGlobalVariables();
@@ -101,6 +114,23 @@ void loop()
   else if (ledVariable == 0)
   {
     digitalWrite(LED_BUILTIN, LOW);
+  }
+
+  if (millis() - previousMillis >= interval)
+  {
+    previousMillis = millis();
+
+    float h = dht.readHumidity();
+    float t = dht.readTemperature();
+    tmp.setVariableValue("temp", t);
+    tmp.setVariableValue("hum", h);
+    Serial.print("Humidity: ");
+    Serial.println(h);
+    Serial.print("Temperature: ");
+    Serial.println(t);
+    String dataTmp = tmp.prepareWebSocketData();
+
+    ws.sendEVENT(dataTmp);
   }
 }
 
@@ -140,13 +170,16 @@ void parseVariableData()
 {
   // Parsing data from server to global variables
   ledVariable = led.getVariableValue("ledVariable");
+  temp = tmp.getVariableValue("temp");
+  hum = tmp.getVariableValue("hum");
 }
-
 
 void setGlobalVariables()
 {
   // Setting global variables to values to fetch them to the server
   led.setVariableValue("ledVariable", ledVariable);
+  tmp.setVariableValue("temp", temp);
+  tmp.setVariableValue("hum", hum);
 }
 
 /**
@@ -201,6 +234,10 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
     if (deviceName == "Led")
     {
       led.processDeviceData(doc[1]);
+    }
+    else if (deviceName == "DHT11")
+    {
+      tmp.processDeviceData(doc[1]);
     }
     else
     {
