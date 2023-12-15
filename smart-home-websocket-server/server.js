@@ -20,8 +20,39 @@ const io = require("socket.io")(server, {
     },
 })
 
+// Registered groups
+const deviceGroups = new Map()
+
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id)
+
+    // Handle device registration for message channelling
+    socket.on("register", (data) => {
+        console.log(`Received registration from ${socket.id}:`, data)
+        const { deviceId, userId } = data
+        // Create a group for the user if it doesn't exist
+        const userGroup = `user:${userId}`
+        if (!deviceGroups.has(userGroup)) {
+            deviceGroups.set(userGroup, new Set())
+        }
+        // Add the device to the user's group
+        deviceGroups.get(userGroup).add(socket)
+        // Store device information in the database
+        // ...
+        console.log(`Device ${deviceId} registered for user ${userId}`)
+    })
+
+    socket.on("message", (data) => {
+        console.log(`Received message from ${socket.id}:`, data)
+
+        // Broadcast the message to all devices in the user's group
+        const userGroup = `user:${data.userId}`
+        if (deviceGroups.has(userGroup)) {
+            deviceGroups.get(userGroup).forEach((deviceSocket) => {
+                deviceSocket.emit("message", data)
+            })
+        }
+    })
 
     // Handle incomming messages between devices and server
     socket.on("deviceMessage", (message) => {
