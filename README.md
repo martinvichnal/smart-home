@@ -5,37 +5,94 @@
 ![](https://img.shields.io/github/issues/martinvichnal/smart-home)
 
 ---
-
 # Introduction
 
 This is the repository of my custom built smart home system.
 This system is a dynamically changeable smart home system built with React TypeScript, firabase and ESP32 devices.
 
 -   _Feel free to **improve, use or fork** this repository in your own projects :)_
--   _For any bugs or improvements feel free to make an [issue](https://github.com/martinvichnal/pomodoro/issues) or make a [pull request](https://github.com/martinvichnal/pomodoro/pulls)_
+-   _For any bugs or improvements feel free to make an [issue](https://github.com/martinvichnal/smart-home/issues) or make a [pull request](https://github.com/martinvichnal/smart-home/pulls)_
 
 ---
-
 # Table of Contents
 
 - [Smart home system](#smart-home-system)
 - [Introduction](#introduction)
 - [Table of Contents](#table-of-contents)
+- [Features](#features)
+- [Hardware Requirements](#hardware-requirements)
+- [Software Dependencies](#software-dependencies)
+- [Installation](#installation)
+   * [WebApp](#webapp)
+   * [Create an IoT device](#create-an-iot-device)
+   * [Servers](#servers)
+      + [WebSocket](#websocket)
+      + [API](#api)
+      + [MSSQL](#mssql)
+- [Configuration](#configuration)
+- [How it works ?](#how-it-works-)
+   * [System](#system)
+   * [User Interface](#user-interface)
+   * [IoT Device](#iot-device)
+   * [Servers](#servers-1)
+      + [Websocket](#websocket-1)
+      + [REST API](#rest-api)
+         - [Database](#database)
 - [Acknowledgements / Source](#acknowledgements--source)
 
 ---
+# Features
 
+
+---
+# Hardware Requirements
+
+
+---
+# Software Dependencies
+
+---
+# Installation
+## WebApp
+## Create an IoT device
+## Servers
+### WebSocket
+### API
+### MSSQL
+
+---
+# Configuration
+
+---
+---
+# How it works ?
+
+---
+## System
 
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png)
-
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png)
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png)
 
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png)
+---
+## User Interface
 
 [<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png)
 
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png)
+---
+## IoT Device
 
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png)
+
+---
+## Servers
+
+### Websocket
+
+### REST API
+
+#### Database
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Database-Structure.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Database-Structure.png)
 
 
 ```JavaScript
@@ -190,6 +247,7 @@ export const user = {
     uIsAuth: true,
 }
 ```
+---
 # Acknowledgements / Source
 
 -   [React](https://react.dev/learn)
