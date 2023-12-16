@@ -6,6 +6,8 @@
 
 ---
 # Introduction
+NOTE: There are major bugs, inefficiency and security issues. This is not at all the best implementation of the system. I just flew too close to the sun and wanted to see what I am capable of.
+
 
 This is the repository of my custom built smart home system.
 This system is a dynamically changeable smart home system built with React TypeScript, firabase and ESP32 devices.
@@ -13,7 +15,6 @@ This system is a dynamically changeable smart home system built with React TypeS
 -   _Feel free to **improve, use or fork** this repository in your own projects :)_
 -   _For any bugs or improvements feel free to make an [issue](https://github.com/martinvichnal/smart-home/issues) or make a [pull request](https://github.com/martinvichnal/smart-home/pulls)_
 
-- NOTE: There are major bugs, inefficiency and security issues. This is not at all the best implementation of the system. I just flew too close to the sun and wanted to see what I am capable of. 
 ---
 # Table of Contents
 
