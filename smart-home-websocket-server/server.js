@@ -55,25 +55,35 @@ io.on("connection", (socket) => {
     })
 
     // Handle incomming messages between devices and server
-    socket.on("deviceMessage", (message) => {
+    socket.on("deviceMessage", (data) => {
         console.log(
             `Received data from device ${socket.id}. Sending message to webMessage: %s`,
-            message
+            data
         )
 
-        // Forward the message to all web clients except the sender
-        socket.broadcast.emit("webMessage", message)
+        // Broadcast the message to all devices in the user's group
+        const userGroup = `user:${data.userId}`
+        if (deviceGroups.has(userGroup)) {
+            deviceGroups.get(userGroup).forEach((deviceSocket) => {
+                deviceSocket.broadcast.emit("webMessage", data)
+            })
+        }
     })
 
     // Handle incomming messages from web clients and server
-    socket.on("webMessage", (message) => {
+    socket.on("webMessage", (data) => {
         console.log(
             `Received data from web client ${socket.id}. Sending message to deviceMessage: %s`,
-            message
+            data
         )
 
-        // Forward the message to the device except the sender
-        socket.broadcast.emit("deviceMessage", message)
+        // Broadcast the message to all devices in the user's group
+        const userGroup = `user:${data.userId}`
+        if (deviceGroups.has(userGroup)) {
+            deviceGroups.get(userGroup).forEach((deviceSocket) => {
+                deviceSocket.broadcast.emit("deviceMessage", data)
+            })
+        }
     })
 
     // Handle client disconnection
