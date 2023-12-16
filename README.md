@@ -22,7 +22,7 @@ This system is a dynamically changeable smart home system built with React TypeS
 - [Features](#features)
 - [Hardware Requirements](#hardware-requirements)
 - [Software Dependencies](#software-dependencies)
-- [Installation](#installation)
+- [Installation and usage](#installation-and-usage)
    * [WebApp](#webapp)
    * [Create an IoT device](#create-an-iot-device)
    * [Servers](#servers)
@@ -42,28 +42,83 @@ This system is a dynamically changeable smart home system built with React TypeS
 
 ---
 # Features
-
+- Dynamically add custom variables to the system
+- Fast and reliable communication
+- Many virtual homes within one ESP
+- Easy implementation
 
 ---
 # Hardware Requirements
-
+- Some computer to run the docker containers (preferably raspberry pi or host it on your preferable server hoster)
+- Any ESP32
+- Sensors or devices of your choise
 
 ---
 # Software Dependencies
+- Docker (running the webapp and the servers)
+- [SmartHome library](https://github.com/martinvichnal/smart-home/tree/main/smart-home-firmware/lib/SmartHome) (or the following librarys if you don't want to use the dedicated library)
+  - [arduinoWebSockets](https://github.com/Links2004/arduinoWebSockets)
+  - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 
 ---
-# Installation
-## WebApp
-## Create an IoT device
-## Servers
-### WebSocket
-### API
-### MSSQL
+# Installation and usage
+1. Clone the repository
+2. Configure and install the components
+### Create an IoT device
+- Create a virtual smart home with the SmartHome class with your server urls and device properties:
+```cpp
+SmartHome desk("Desk", "1", "1", "http://0.0.0.0:0000");
+```
+- Add custom bool or int to your SmartHome:
+```cpp
+desk.addVariableBool(13, "deskLamp", deskLamp);
+```
+- Validate the home:
+  - Note: before validation the ESP32 needs to connect to your local network
+```cpp
+desk.validateHome();
+```
+- Initialize the WebSocket connection:
+```cpp
+ws.begin(webSocketServerAddress, webSocketServerPort, "/socket.io/?EIO=4");
+ws.onEvent(webSocketEvents);
+```
+- Call the WebSocket loop in the loop section:
+```cpp
+ws.loop();
+```
+- Stringify the home then send it at your neede
+```cpp
+String dataDesk = desk.prepareWebSocketData();
+ws.sendEVENT(dataDesk);
+```
+
+### WebApp
+```
+npm run dev
+```
+### Servers
+For running the servers you need to build then execute it on the docker app
+#### WebSocket
+```
+docker build . -t smart-home-websocket
+docker run -p 5000:5000 smart-home-websocket
+```
+#### API
+```
+docker build . -t smart-home-api
+docker run -p 8080:8080 smart-home-api
+```
+#### MSSQL
+```
+docker build . -t smart-home-db
+docker run -p : smart-home-db
+```
 
 ---
 # Configuration
+In order to use the system you have to configure the webapp and the ESP32 to connect to the servers via IP and their port and also you have to set your wifi `ssid` and `password` credentials in your ESP32 project
 
----
 ---
 # How it works ?
 
