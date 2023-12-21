@@ -24,35 +24,15 @@ const io = require("socket.io")(server, {
 const deviceGroups = new Map()
 
 io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id)
-
-    // Handle device registration for message channelling
-    socket.on("register", (data) => {
-        console.log(`Received registration from ${socket.id}:`, data)
-        const { deviceId, userId } = data
-        // Create a group for the user if it doesn't exist
-        const userGroup = `user:${userId}`
-        if (!deviceGroups.has(userGroup)) {
-            deviceGroups.set(userGroup, new Set())
-        }
-        // Add the device to the user's group
-        deviceGroups.get(userGroup).add(socket)
-        // Store device information in the database
-        // ...
-        console.log(`Device ${deviceId} registered for user ${userId}`)
-    })
-
-    socket.on("message", (data) => {
-        console.log(`Received message from ${socket.id}:`, data)
-
-        // Broadcast the message to all devices in the user's group
-        const userGroup = `user:${data.userId}`
-        if (deviceGroups.has(userGroup)) {
-            deviceGroups.get(userGroup).forEach((deviceSocket) => {
-                deviceSocket.emit("message", data)
-            })
-        }
-    })
+    console.log(`Received connection from ${socket.id}:`, req)
+    const { deviceId, userId } = req.query // assuming deviceId and userId are passed as query parameters
+    const userGroup = `user:${userId}`
+    if (!deviceGroups.has(userGroup)) {
+        deviceGroups.set(userGroup, new Set())
+    }
+    deviceGroups.get(userGroup).add(socket)
+    // Store device information in the database
+    console.log(`Device ${deviceId} registered for user ${userId}`)
 
     // Handle incomming messages between devices and server
     socket.on("deviceMessage", (data) => {
@@ -61,34 +41,44 @@ io.on("connection", (socket) => {
             data
         )
 
-        // Broadcast the message to all devices in the user's group
+        // Consider this as an acknowledge message
+        // Broadcast the message to all web clients in the user's group
         const userGroup = `user:${data.userId}`
         if (deviceGroups.has(userGroup)) {
-            deviceGroups.get(userGroup).forEach((deviceSocket) => {
-                deviceSocket.broadcast.emit("webMessage", data)
+            deviceGroups.get(userGroup).forEach((webSocket) => {
+                if (webSocket !== socket) {
+                    webSocket.emit("webMessage", data)
+                }
             })
         }
     })
 
-    // Handle incomming messages from web clients and server
+    // Handle incoming messages from web clients
     socket.on("webMessage", (data) => {
         console.log(
             `Received data from web client ${socket.id}. Sending message to deviceMessage: %s`,
             data
         )
 
-        // Broadcast the message to all devices in the user's group
+        // Send the message only to the specific device
         const userGroup = `user:${data.userId}`
         if (deviceGroups.has(userGroup)) {
-            deviceGroups.get(userGroup).forEach((deviceSocket) => {
-                deviceSocket.broadcast.emit("deviceMessage", data)
-            })
+            const deviceSocket = deviceGroups
+                .get(userGroup)
+                .find((deviceSocket) => deviceSocket.id === data.deviceId)
+            if (deviceSocket) {
+                deviceSocket.emit("deviceMessage", data)
+            }
         }
     })
 
     // Handle client disconnection
     socket.on("disconnect", () => {
         console.log("A user disconnected:", socket.id)
+        // Remove the socket from the user's group
+        if (deviceGroups.has(userGroup)) {
+            deviceGroups.get(userGroup).delete(socket)
+        }
     })
 })
 
@@ -114,4 +104,21 @@ server.listen(PORT, () => {
 //     console.log(data, "DATA")
 //     //This will send a message to a specific room ID
 //     socket.to(data.roomId).emit("receive_msg", data)
+// })
+
+// console.log("A user connected:", socket.id)
+// // Handle device registration for message channelling
+// socket.on("register", (data) => {
+//     console.log(`Received registration from ${socket.id}:`, data)
+//     const { deviceId, userId } = data
+//     // Create a group for the user if it doesn't exist
+//     const userGroup = `user:${userId}`
+//     if (!deviceGroups.has(userGroup)) {
+//         deviceGroups.set(userGroup, new Set())
+//     }
+//     // Add the device to the user's group
+//     deviceGroups.get(userGroup).add(socket)
+//     // Store device information in the database
+//     // ...
+//     console.log(`Device ${deviceId} registered for user ${userId}`)
 // })

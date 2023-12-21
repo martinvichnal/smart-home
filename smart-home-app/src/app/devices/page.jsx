@@ -8,6 +8,8 @@ import DeviceBox from "@/app/testing/components/DeviceBox"
 import { Suspense, useEffect, useState } from "react"
 
 export default function Devices() {
+    unstable_noStore()
+
     const [socket, setSocket] = useState(null)
     const [devices, setDevices] = useState([])
 
@@ -27,12 +29,6 @@ export default function Devices() {
                 return [...prevDevices, deviceData]
             }
         })
-    }
-
-    const fetchDevices = async () => {
-        const newDevices = await getDevice(user.uid)
-        console.log(newDevices)
-        setDevices(newDevices)
     }
 
     useEffect(() => {
