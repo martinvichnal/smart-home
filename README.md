@@ -112,9 +112,13 @@ docker build . -t smart-home-api
 docker run -p 8080:8080 smart-home-api
 ```
 #### MSSQL
+Pulling the Microsoft SQL database docker images from Microsoft
 ```
-docker build . -t smart-home-db
-docker run -p : smart-home-db
+docker pull mcr.microsoft.com/mssql/server:2022-latest
+```
+Creating docker container from the image with cusomt name `--name iot-database` and password `"MSSQL_SA_PASSWORD=ThisIsThePassword!24"` (A strong system administrator (SA) password: At least 8 characters including uppercase, lowercase letters, base-10 digits and/or non-alphanumeric symbols.)
+```
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=ThisIsThePassword!24" -p 1433:1433 -d --name iot-database mcr.microsoft.com/mssql/server:2022-latest
 ```
 
 ---
