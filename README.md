@@ -120,6 +120,24 @@ Creating docker container from the image with cusomt name `--name iot-database` 
 ```
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=ThisIsThePassword!24" -p 1433:1433 -d --name iot-database mcr.microsoft.com/mssql/server:2022-latest
 ```
+Demo data injection
+```sql
+-- Create the devices table
+CREATE TABLE devices (
+    did VARCHAR(255),
+    dn VARCHAR(255),
+    dd VARCHAR(MAX),
+    uid VARCHAR(255)
+);
+
+-- Insert data into the devices table
+INSERT INTO devices (did, dn, dd, uid)
+VALUES 
+    ('1001', 'Device1', 'property1-n-0-100-50--property2-b-0-1-0--', '1124'),
+    ('1002', 'Device2', 'setting1-b-0-1-1--setting2-n-0-10-5--', '1124'),
+    ('1003', 'Device3', 'temperature-n-0-50-25--humidity-n-0-100-75--', '1124'),
+    ('1004', 'Device4', 'state-b-0-1-1--brightness-n-0-255-128--', '1124');
+```
 
 ---
 # Configuration
