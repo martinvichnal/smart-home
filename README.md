@@ -61,6 +61,7 @@ This system is a dynamically changeable smart home system built with React TypeS
 - [SmartHome library](https://github.com/martinvichnal/smart-home/tree/main/smart-home-firmware/lib/SmartHome) (or the following librarys if you don't want to use the dedicated library)
   - [arduinoWebSockets](https://github.com/Links2004/arduinoWebSockets)
   - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- On the Webapp side you can find the dependencies in the package.json file
 
 ---
 # Installation and usage
