@@ -7,19 +7,14 @@ import { on } from "events"
 
 import { useEffect, useState } from "react"
 
-type deviceType = {
+interface deviceType {
     DID: string
     DN: string
     DD: string
     UID: string
 }
 
-type DeviceBoxProps = {
-    device: deviceType
-    onDeviceChange: deviceType
-}
-
-type deviceVariableType = {
+interface deviceVariableType {
     name: string
     type: string
     min: number
@@ -27,23 +22,18 @@ type deviceVariableType = {
     value: number
 }
 
+interface DeviceBoxProps {
+    DID: string
+    DN: string
+    DD: string
+    UID: string
+    // onDeviceChange: (data: deviceType) => void
+}
+
 function parseDeviceData(deviceData: string): deviceVariableType[] {
     const deviceVariables = deviceData.split("--").filter(Boolean) // Split by '--' and remove empty strings
     return deviceVariables.map((deviceVariables) => {
         const [name, type, min, max, value] = deviceVariables.split("-")
-        console.log(
-            "paresd informations:" +
-                "name: " +
-                name +
-                " type: " +
-                type +
-                " min: " +
-                min +
-                " max: " +
-                max +
-                " value: " +
-                value
-        )
         return {
             name,
             type,
@@ -54,28 +44,54 @@ function parseDeviceData(deviceData: string): deviceVariableType[] {
     })
 }
 
-export default function DeviceBox(
-    { DID, DN, DD, UID }: deviceType,
-    onDeviceChange: deviceType
-) {
+// Stringify device data
+function stringifyDeviceData(deviceVariables: deviceVariableType[]): string {
+    return deviceVariables
+        .map(
+            (deviceVariable) =>
+                `${deviceVariable.name}-${deviceVariable.type}-${deviceVariable.min}-${deviceVariable.max}-${deviceVariable.value}`
+        )
+        .join("--")
+}
+
+export default function DeviceBox({ DID, DN, DD, UID }: DeviceBoxProps) {
+    // Storing device variables
     const [deviceVariables, setDeviceVariables] = useState<
         deviceVariableType[]
     >([])
 
+    // Handle Device Data changes
     useEffect(() => {
         // parse device string and setting
+        console.log("device.DD: " + DD)
         const paresdDeviceVariables = parseDeviceData(DD)
         setDeviceVariables(paresdDeviceVariables)
-    }, [])
+    }, [DD])
 
-    // Handle Device Data changes
-    useEffect(() => {}, [DD])
+    // Handle variable changes
+    useEffect(() => {
+        // stringify device string and setting
+        const stringifiedDeviceVariables = stringifyDeviceData(deviceVariables)
+        console.log(
+            "Sending to server...:" + DID + " " + stringifiedDeviceVariables
+        )
+        // onDeviceChange({ ...device, DD: stringifiedDeviceVariables })
+    }, [deviceVariables])
 
-    const handleVariableChange = (DD: string) => {
-        // Handle changes in the devices
-        // This is used to update the devices list when a new device is added or removed
-        // console.log(value)
-        onDeviceChange({ DID, DN, DD, UID })
+    // Setting the new value of the variable in the state
+    const handleVariableChange = (
+        variableName: string,
+        newVariable: string
+    ) => {
+        // Change the prev value to new value in the deviceVariable state
+        setDeviceVariables((prevVariables) => {
+            return prevVariables.map((variable) => {
+                if (variable.name === variableName) {
+                    return { ...variable, value: Number(newVariable) }
+                }
+                return variable
+            })
+        })
     }
 
     return (
@@ -87,28 +103,48 @@ export default function DeviceBox(
             {deviceVariables.map((variable) => (
                 <div key={variable.name}>
                     <p>{variable.name}</p>
-                    {variable.type === "b" ? (
+                    <Button
+                        onClick={(value) => {
+                            handleVariableChange(
+                                variable.name,
+                                variable.value.toString()
+                            )
+                        }}
+                    >
+                        {variable.name}
+                    </Button>
+                </div>
+            ))}
+        </div>
+    )
+}
+
+{
+    /* {variable.type === "b" ? (
                         <Switch
+                            name={variable.name}
                             defaultValue={variable.value}
                             onChange={(value) => {
-                                handleVariableChange(value.toString())
+                                handleVariableChange(
+                                    variable.name,
+                                    value.toString()
+                                )
                             }}
                             // checked={variable.value === 1}
                         />
                     ) : (
                         <Slider
-                            onChange={(value) => {
-                                handleVariableChange(value.toString())
+                            name={variable.name}
+                            onDragEnd={(value) => {
+                                handleVariableChange(
+                                    variable.name,
+                                    value.toString()
+                                )
                             }}
                             defaultValue={[variable.value]}
                             max={variable.max}
                             min={variable.min}
                             step={1}
                         />
-                    )}
-                </div>
-            ))}
-            <Button>Submit</Button>
-        </div>
-    )
+                    )} */
 }
