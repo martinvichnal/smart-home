@@ -5,11 +5,11 @@ Responsible controlling the variables in user client.
 */
 
 "use client"
+
 import { RenderDeviceVariableProps } from "@/lib/interfaces"
 
-import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
+import { Button, Slider } from "@nextui-org/react"
+import { useState, useEffect } from "react"
 
 export default function RenderVariable({
     name,
@@ -19,36 +19,76 @@ export default function RenderVariable({
     value,
     onDeviceVariableChange,
 }: RenderDeviceVariableProps) {
-    const handleVariableChange = (name: string, value: string) => {
-        // onDeviceVariableChange(name, value)
-        console.log("name: " + name)
-        console.log("value: " + value)
+    const handleVariableChange = (name: string, value: number) => {
+        onDeviceVariableChange(name, value)
     }
 
-    return (
-        <div className="">
-            {type === "b" ? (
-                <Switch
-                    name={name}
-                    defaultValue={[value.toString()]}
-                    onChange={(e: any) =>
-                        handleVariableChange(name, e.target.value)
-                    }
-                    // checked={variable.value === 1}
-                />
-            ) : (
+    switch (type) {
+        case "b":
+            if (value === 1) {
+                return (
+                    <Button
+                        color="success"
+                        onClick={() => handleVariableChange(name, value)}
+                        defaultValue={String(value)}
+                    >
+                        {name}
+                    </Button>
+                )
+            } else if (value === 0) {
+                return (
+                    <Button
+                        color="danger"
+                        onClick={() => handleVariableChange(name, value)}
+                        defaultValue={String(value)}
+                    >
+                        {name}
+                    </Button>
+                )
+            }
+
+        case "n":
+            return (
                 <Slider
-                    name={name}
-                    onDragEnd={(value) => {
-                        handleVariableChange(name, value.toString())
-                    }}
-                    // defaultValue={value}
-                    defaultValue={[Number(value)]}
-                    max={max}
-                    min={min}
+                    size="md"
                     step={1}
+                    maxValue={max}
+                    minValue={min}
+                    aria-label={name}
+                    defaultValue={value}
+                    className="max-w-md"
+                    onChange={(value) =>
+                        handleVariableChange(name, Number(value))
+                    }
                 />
-            )}
-        </div>
-    )
+            )
+        default:
+            return <></>
+    }
 }
+
+// return (
+//     <div className="">
+//         {type === "b" ? (
+//             <Button
+//                 onClick={() => handleVariableChange(name, valueState)}
+//                 defaultValue={String(value)}
+//             >
+//                 {name}
+//             </Button>
+//         ) : (
+//             <Slider
+//                 size="md"
+//                 step={1}
+//                 maxValue={max}
+//                 minValue={min}
+//                 aria-label={name}
+//                 defaultValue={value}
+//                 className="max-w-md"
+//                 onChange={(value) =>
+//                     handleVariableChange(name, Number(value))
+//                 }
+//             />
+//         )}
+//     </div>
+// )

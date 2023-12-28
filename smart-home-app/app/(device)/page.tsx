@@ -11,14 +11,35 @@ import { Suspense } from "react"
 import { DeviceInterface } from "@/lib/interfaces"
 import { getAllDevices } from "@/actions/getAllDevices"
 import RenderDevice from "./components/RenderDevice"
+import postDeviceData from "@/actions/postDeviceData"
 
 export default function DevicePage() {
     const [devices, setDevices] = useState<DeviceInterface[]>([]) // State for storing devices in array
 
     // Broadcast message to the device. PROP: stringified Device Data
-    const handleDeviceChange = (deviceString: string) => {
-        // EMITTING MESSAGE TO THE DEVICE
+    const handleDeviceChange = ({ did, dn, dd, uid }: DeviceInterface) => {
+        console.log(dd)
+        const updatedDevice = {
+            did,
+            dn,
+            dd,
+            uid,
+        }
+        // Setting the device state
+        // setDevices((prevDevices) => {
+        //     return prevDevices.map((device) => {
+        //         if (device.did === did) {
+        //             return updatedDevice
+        //         }
+        //         return device
+        //     })
+        // })
+        // console.time("postDeviceData")
+        // postDeviceData(updatedDevice)
+        // console.timeEnd("postDeviceData")
     }
+
+    // useEffect(() => {}, [devices])
 
     useEffect(() => {
         // Fetching devices

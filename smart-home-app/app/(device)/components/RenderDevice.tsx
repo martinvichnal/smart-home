@@ -23,11 +23,14 @@ export default function RenderDevice({
 
     // // Handle Device Data changes
     useEffect(() => {
-        // parse device string and setting
-        // console.log("device.DD: " + dd)
         const paresdDeviceVariables = parseDeviceData(dd)
         setDeviceVariables(paresdDeviceVariables)
     }, [dd])
+
+    useEffect(() => {
+        const stringifiedDeviceVariables = stringifyDeviceData(deviceVariables)
+        onDeviceChange({ did, dn, dd: stringifiedDeviceVariables, uid })
+    }, [deviceVariables])
 
     // Handle Device Variable changes
     const onVariableChange = (name: string, value: number) => {
@@ -39,9 +42,6 @@ export default function RenderDevice({
             return deviceVariable
         })
         setDeviceVariables(updatedDeviceVariables)
-        // Update the device data
-        const updatedDeviceData = stringifyDeviceData(updatedDeviceVariables)
-        onDeviceChange(updatedDeviceData)
     }
 
     return (

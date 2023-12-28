@@ -26,6 +26,6 @@ export interface RenderDeviceVariableProps {
     type: string
     min: number
     max: number
-    value: number | boolean | string
+    value: number
     onDeviceVariableChange: any
 }
