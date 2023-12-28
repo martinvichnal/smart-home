@@ -6,6 +6,7 @@ Responsible for getting asynchronus data from the database.
 
 "use client"
 
+import { Chip, Divider, Tooltip } from "@nextui-org/react"
 import { useEffect, useState } from "react"
 import RenderVariable from "./RenderVariable"
 import { RenderDeviceProps, DeviceVariableInterface } from "@/lib/interfaces"
@@ -41,16 +42,28 @@ export default function RenderDevice({
     return (
         <div className="m-6 p-6 bg-white border border-gray-200 rounded-lg shadow-lg">
             <div className="pb-6">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                    {dn}
-                </h2>
+                <div className="flex gap-6">
+                    <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                        {dn}
+                    </h2>
+                    <Tooltip content="The device is online at the moment">
+                        <Chip color="success" variant="flat" size="sm">
+                            Online
+                        </Chip>
+                    </Tooltip>
+                    <Tooltip content="The device is offline at the moment">
+                        <Chip color="danger" variant="flat" size="sm">
+                            Offline
+                        </Chip>
+                    </Tooltip>
+                </div>
                 <div className="flex gap-6">
                     <p className="text-base text-gray-300">Device {did}</p>
                     <p className="text-base text-gray-300">User {uid}</p>
                 </div>
+                <Divider className="m-2" />
             </div>
-
-            <div className="grid grid-cols-2 gap-8 justify-start">
+            <div className="grid grid-cols-1 gap-6">
                 {deviceVariables.map(
                     (deviceVariable: DeviceVariableInterface) => (
                         <RenderVariable

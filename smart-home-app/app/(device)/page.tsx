@@ -76,7 +76,7 @@ export default function DevicePage() {
 
     return (
         <div>
-            <div className="flex flex-wrap lg:justify-evenly md:justify-evenly sm:justify-center">
+            <div className=" grid xl:grid-cols-2 lg:grid-cols-1">
                 <Suspense fallback={<div>Loading...</div>}>
                     {devices.map((device: DeviceInterface) => (
                         <RenderDevice

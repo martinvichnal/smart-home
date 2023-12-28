@@ -26,37 +26,23 @@ export default function RenderVariable({
 
     switch (type) {
         case "b":
-            if (value === 1) {
-                return (
-                    <Button
-                        color="success"
-                        radius="sm"
-                        onClick={() =>
-                            handleVariableChange(name, value === 1 ? 0 : 1)
-                        }
-                        defaultValue={String(value)}
-                    >
-                        {name}
-                    </Button>
-                )
-            } else if (value === 0) {
-                return (
-                    <Button
-                        color="danger"
-                        radius="sm"
-                        onClick={() =>
-                            handleVariableChange(name, value === 0 ? 1 : 0)
-                        }
-                        defaultValue={String(value)}
-                    >
-                        {name}
-                    </Button>
-                )
-            }
+            return (
+                <Button
+                    color={value === 1 ? "success" : "danger"}
+                    radius="sm"
+                    onClick={() =>
+                        handleVariableChange(name, value === 1 ? 0 : 1)
+                    }
+                    defaultValue={String(value)}
+                >
+                    {name}
+                </Button>
+            )
 
         case "n":
             return (
                 <Slider
+                    color="foreground"
                     size="md"
                     step={1}
                     maxValue={max}
