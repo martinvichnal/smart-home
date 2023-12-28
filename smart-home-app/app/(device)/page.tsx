@@ -18,7 +18,7 @@ export default function DevicePage() {
 
     // Broadcast message to the device. PROP: stringified Device Data
     const handleDeviceChange = ({ did, dn, dd, uid }: DeviceInterface) => {
-        console.log(dd)
+        // Creating a device object
         const updatedDevice = {
             did,
             dn,
@@ -26,28 +26,27 @@ export default function DevicePage() {
             uid,
         }
         // Setting the device state
-        // setDevices((prevDevices) => {
-        //     return prevDevices.map((device) => {
-        //         if (device.did === did) {
-        //             return updatedDevice
-        //         }
-        //         return device
-        //     })
-        // })
-        // console.time("postDeviceData")
-        // postDeviceData(updatedDevice)
-        // console.timeEnd("postDeviceData")
+        setDevices((prevDevices) => {
+            return prevDevices.map((device) => {
+                if (device.did === did) {
+                    return updatedDevice
+                }
+                return device
+            })
+        })
+        postDeviceData(updatedDevice)
     }
 
-    // useEffect(() => {}, [devices])
+    useEffect(() => {
+        // console.log(devices)
+    }, [devices])
 
     useEffect(() => {
         // Fetching devices
         const getDevices = async () => {
-            console.log(`${process.env.API_SERVER_IP}/api/devices`)
             const fetchedData = await getAllDevices()
             setDevices(fetchedData)
-            console.log(devices)
+            // console.log(devices)
         }
         getDevices()
 
@@ -77,8 +76,6 @@ export default function DevicePage() {
 
     return (
         <div>
-            <h1>Device Page</h1>
-            {/* <RenderDevice onDeviceChange={handleDeviceChange} /> */}
             <div className="flex flex-wrap lg:justify-evenly md:justify-evenly sm:justify-center">
                 <Suspense fallback={<div>Loading...</div>}>
                     {devices.map((device: DeviceInterface) => (

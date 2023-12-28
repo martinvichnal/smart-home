@@ -19,7 +19,8 @@ export default function RenderVariable({
     value,
     onDeviceVariableChange,
 }: RenderDeviceVariableProps) {
-    const handleVariableChange = (name: string, value: number) => {
+    const handleVariableChange = (name: string, value: number | boolean) => {
+        // console.log(name, value)
         onDeviceVariableChange(name, value)
     }
 
@@ -29,7 +30,10 @@ export default function RenderVariable({
                 return (
                     <Button
                         color="success"
-                        onClick={() => handleVariableChange(name, value)}
+                        radius="sm"
+                        onClick={() =>
+                            handleVariableChange(name, value === 1 ? 0 : 1)
+                        }
                         defaultValue={String(value)}
                     >
                         {name}
@@ -39,7 +43,10 @@ export default function RenderVariable({
                 return (
                     <Button
                         color="danger"
-                        onClick={() => handleVariableChange(name, value)}
+                        radius="sm"
+                        onClick={() =>
+                            handleVariableChange(name, value === 0 ? 1 : 0)
+                        }
                         defaultValue={String(value)}
                     >
                         {name}

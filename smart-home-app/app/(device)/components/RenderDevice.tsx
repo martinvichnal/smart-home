@@ -19,13 +19,7 @@ export default function RenderDevice({
 }: RenderDeviceProps) {
     const [deviceVariables, setDeviceVariables] = useState<
         DeviceVariableInterface[]
-    >([]) // State for storing device variables in array
-
-    // // Handle Device Data changes
-    useEffect(() => {
-        const paresdDeviceVariables = parseDeviceData(dd)
-        setDeviceVariables(paresdDeviceVariables)
-    }, [dd])
+    >(parseDeviceData(dd))
 
     useEffect(() => {
         const stringifiedDeviceVariables = stringifyDeviceData(deviceVariables)
