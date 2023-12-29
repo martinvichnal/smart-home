@@ -63,7 +63,7 @@ export default function DevicePage() {
             command: "Hello from the webapp!",
             value: 22,
         }
-        socketIO.emit("webMessage", message)
+        socketIO.emit("webMessage", "1", JSON.stringify(message))
 
         // Handle incoming messages from the server
         socketIO.on("message", (message) => {

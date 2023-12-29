@@ -33,30 +33,43 @@ io.on("connection", (socket) => {
         )
 
         if (clientType === "webapp") {
-            socket.on("webMessage", (message) => {
-                const targetClientId = `${userId}-${deviceId}-device`
-                const targetSocket = connectedClients.get(targetClientId)
-                if (targetSocket) {
-                    targetSocket.emit("message", message)
+            socket.on("webMessage", (targetDeviceId, message) => {
+                // Find the device socket with the matching deviceId
+                const deviceSocket = Array.from(
+                    connectedClients.entries()
+                ).find(([clientId, socket]) =>
+                    clientId.endsWith(`-${targetDeviceId}`)
+                )?.[1]
+
+                if (deviceSocket) {
+                    deviceSocket.emit("message", message)
                     console.log(
-                        `Webapp sent message to Device ${deviceId}: ${message}`
+                        `Webapp sent message to Device ${targetDeviceId}: ${message}`
                     )
                 } else {
                     console.log(
-                        `Webapp message target not found for Device ${deviceId}`
+                        `Webapp message target not found for Device ${targetDeviceId}`
                     )
                 }
             })
         } else if (clientType === "device") {
-            socket.on("deviceMesssage", (message) => {
-                const targetClientId = `${userId}-${deviceId}-webapp`
-                const targetSocket = connectedClients.get(targetClientId)
-                if (targetSocket) {
-                    targetSocket.emit("message", message)
-                    console.log(`ESP32 sent message to Webapp: ${message}`)
-                } else {
-                    console.log(`ESP32 message target not found for Webapp`)
-                }
+            socket.on("deviceMessage", (message) => {
+                // Find all webapp sockets associated with the userId
+                const webappSockets = Array.from(connectedClients.entries())
+                    .filter(
+                        ([clientId, socket]) =>
+                            clientId.startsWith(`${userId}-`) &&
+                            socket.id !== socket.id // Exclude the sender
+                    )
+                    .map(([clientId, socket]) => socket)
+
+                webappSockets.forEach((webappSocket) => {
+                    webappSocket.emit("message", message)
+                })
+
+                console.log(
+                    `Device ${deviceId} sent a message to Webapp: ${message}`
+                )
             })
         }
     })
