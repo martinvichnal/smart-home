@@ -58,7 +58,7 @@ Functions declarations
 void connectToWifi(); // Connecting to WiFi
 void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length);
 void handleWebSocketEvent(uint8_t *payload, size_t length);
-void joinWebSocketGroup(String uid, String did);
+void joinWebSocketGroup();
 
 // Socket.IO functions
 SocketIOclient ws;
@@ -234,7 +234,6 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
   // Deserializing EVENT payload into EVENT NAME and EVENT DATA
   char *sptr = NULL;
   int id = strtol((char *)payload, &sptr, 10);
-  Serial.printf("WS - [IOc] get event: %s id: %d\n", payload, id);
   if (id)
   {
     payload = (uint8_t *)sptr;
@@ -252,9 +251,8 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
   Serial.printf("WS - [IOc] event name: %s\n", eventName.c_str());
   Serial.printf("WS - [IOc] payload: %s\n", doc[1].as<String>().c_str());
 
-  if (eventName == "deviceMessage")
+  if (eventName == "message")
   {
-    Serial.println("WS - Deserialization of deviceMessage");
     Serial.println(doc[1].as<String>());
     DynamicJsonDocument jsonData(1024);
     DeserializationError errorJson = deserializeJson(jsonData, doc[1].as<String>());
@@ -305,9 +303,6 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
  */
 void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length)
 {
-  String userJoinID = userID;
-  String deskJoinID = deskID;
-  String joinEventDesk = "[\"join\", \"" + userJoinID + "\", \"" + deskJoinID + "\"]";
   switch (type)
   {
   case sIOtype_DISCONNECT:
@@ -316,7 +311,7 @@ void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length
   case sIOtype_CONNECT:
     Serial.printf("WS - [IOc] Connected to url: %s\n", payload);
     ws.send(sIOtype_CONNECT, "/");
-    ws.sendEVENT(joinEventDesk);
+    joinWebSocketGroup();
     break;
   case sIOtype_EVENT:
     Serial.printf("WS - [IOc] get event: %s\n", payload);
@@ -337,16 +332,16 @@ void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length
   }
 }
 
-void joinWebSocketGroup(String uid, String did)
+void joinWebSocketGroup()
 {
   // Sending join event to the websocket server
   String userJoinID = userID;
   String deskJoinID = deskID;
   String thermJoinID = thermID;
   String bedJoinID = bedID;
-  String joinEventDesk = "[\"join\", \"" + userJoinID + "\", \"" + deskJoinID + "\"]";
-  String joinEventTherm = "[\"join\", \"" + userJoinID + "\", \"" + thermJoinID + "\"]";
-  String joinEventBed = "[\"join\", \"" + userJoinID + "\", \"" + bedJoinID + "\"]";
+  String joinEventDesk = "[\"join\", \"" + userJoinID + "\", \"" + deskJoinID + "\", \"" + "device" + "\"]";
+  String joinEventTherm = "[\"join\", \"" + userJoinID + "\", \"" + thermJoinID + "\", \"" + "device" + "\"]";
+  String joinEventBed = "[\"join\", \"" + userJoinID + "\", \"" + bedJoinID + "\", \"" + "device" + "\"]";
   ws.sendEVENT(joinEventDesk);
   ws.sendEVENT(joinEventTherm);
   ws.sendEVENT(joinEventBed);

@@ -43,10 +43,6 @@ export default function DevicePage() {
 
     useEffect(() => {
         console.log(devices)
-        // socket.emit("webappMessage", {
-        //     deviceId,
-        //     message: JSON.stringify(devices),
-        // })
     }, [devices])
 
     useEffect(() => {
@@ -61,10 +57,13 @@ export default function DevicePage() {
         const socketIO = io("ws://192.168.0.27:5000") // Connecting to websocket and handling messages events
         setSocket(socketIO)
         // Emit the "join" event when the component mounts
-        socketIO.emit("join", userId, "webapp")
-        const message = "Hello from the webapp!"
-        const id = "webapp"
-        socketIO.emit("webappMessage", { deviceId, message })
+        socketIO.emit("join", userId, "webapp", "webapp")
+
+        const message = {
+            command: "Hello from the webapp!",
+            value: 22,
+        }
+        socketIO.emit("webMessage", message)
 
         // Handle incoming messages from the server
         socketIO.on("message", (message) => {

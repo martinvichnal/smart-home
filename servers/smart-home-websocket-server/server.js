@@ -20,25 +20,24 @@ const sendConnectionStatusEvent = (socket, userId) => {
 io.on("connection", (socket) => {
     console.log(`A client connected: ${socket.id}`)
 
-    socket.on("join", (userId, userType) => {
+    socket.on("join", (userId, deviceId, clientType) => {
         socket.userId = userId
-        const clientId = `${userId}-${socket.id}`
+        socket.deviceId = deviceId
+        const clientId = `${userId}-${deviceId}-${clientType}-${socket.id}`
         connectedClients.set(clientId, socket)
 
         sendConnectionStatusEvent(socket, userId)
 
         console.log(
-            `User ${userId} joined as ${userType} with socket ID ${socket.id}`
+            `User "${userId}" joined as: "${clientType}" with ID:"${deviceId}" with socket ID:"${socket.id}"`
         )
 
-        if (userType === "webapp") {
-            socket.on("webMessage", (data) => {
-                const { deviceId, message } = data
-                console.log("data: " + data.deviceId + " " + data.message)
-                const deviceClientId = `${userId}-${deviceId}`
-                const deviceSocket = connectedClients.get(deviceClientId)
-                if (deviceSocket) {
-                    deviceSocket.emit("message", message)
+        if (clientType === "webapp") {
+            socket.on("webMessage", (message) => {
+                const targetClientId = `${userId}-${deviceId}-device`
+                const targetSocket = connectedClients.get(targetClientId)
+                if (targetSocket) {
+                    targetSocket.emit("message", message)
                     console.log(
                         `Webapp sent message to Device ${deviceId}: ${message}`
                     )
@@ -48,23 +47,16 @@ io.on("connection", (socket) => {
                     )
                 }
             })
-        } else if (userType === "device") {
-            socket.on("deviceMessage", (message) => {
-                const connectedWebappSockets = Array.from(
-                    connectedClients.keys()
-                )
-                    .filter(
-                        (clientId) =>
-                            clientId.startsWith(userId) &&
-                            clientId.includes("-webapp")
-                    )
-                    .map((clientId) => connectedClients.get(clientId))
-
-                connectedWebappSockets.forEach((webappSocket) => {
-                    webappSocket.emit("message", message)
-                })
-
-                console.log(`A device sent a message to Webapp: ${message}`)
+        } else if (clientType === "device") {
+            socket.on("deviceMesssage", (message) => {
+                const targetClientId = `${userId}-${deviceId}-webapp`
+                const targetSocket = connectedClients.get(targetClientId)
+                if (targetSocket) {
+                    targetSocket.emit("message", message)
+                    console.log(`ESP32 sent message to Webapp: ${message}`)
+                } else {
+                    console.log(`ESP32 message target not found for Webapp`)
+                }
             })
         }
     })
@@ -72,9 +64,11 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log(`A client disconnected: ${socket.id}`)
 
-        const clientId = `${socket.userId}-${socket.id}`
+        const clientId = `${socket.userId}-${socket.deviceId}-${socket.id}`
         connectedClients.delete(clientId)
-        console.log(`User ${socket.userId} disconnected`)
+        console.log(
+            `User ${socket.userId} for Device ${socket.deviceId} disconnected`
+        )
     })
 })
 
