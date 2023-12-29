@@ -118,7 +118,7 @@ unsigned long messageTimestamp = 0;
 |________/ \______/  \______/ |__/
 */
 unsigned long previousMillis = 0;
-const unsigned long interval = 10000; // Delay interval in milliseconds
+const unsigned long interval = 5000; // Delay interval in milliseconds
 
 void loop()
 {
@@ -149,12 +149,12 @@ void loop()
     setGlobalVariables();
 
     String dataDesk = desk.prepareWebSocketData();
-    // String dataTherm = therm.prepareWebSocketData();
-    // String dataBed = bed.prepareWebSocketData();
+    String dataTherm = therm.prepareWebSocketData();
+    String dataBed = bed.prepareWebSocketData();
 
     ws.sendEVENT(dataDesk);
-    // ws.sendEVENT(dataTherm);
-    // ws.sendEVENT(dataBed);
+    ws.sendEVENT(dataTherm);
+    ws.sendEVENT(dataBed);
   }
 }
 
@@ -343,6 +343,6 @@ void joinWebSocketGroup()
   String joinEventTherm = "[\"join\", \"" + userJoinID + "\", \"" + thermJoinID + "\", \"" + "device" + "\"]";
   String joinEventBed = "[\"join\", \"" + userJoinID + "\", \"" + bedJoinID + "\", \"" + "device" + "\"]";
   ws.sendEVENT(joinEventDesk);
-  // ws.sendEVENT(joinEventTherm);
-  // ws.sendEVENT(joinEventBed);
+  ws.sendEVENT(joinEventTherm);
+  ws.sendEVENT(joinEventBed);
 }

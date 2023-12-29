@@ -56,21 +56,24 @@ export default function DevicePage() {
 
         const socketIO = io("ws://192.168.0.27:5000") // Connecting to websocket and handling messages events
         setSocket(socketIO)
-        // Emit the "join" event when the component mounts
-        socketIO.emit("join", userId, "webapp", "webapp")
 
-        const message = {
-            command: "Hello from the webapp!",
-            value: 22,
-        }
-        socketIO.emit("webMessage", "1", JSON.stringify(message))
+        // Join the server
+        socketIO.emit("join", "1124", "webapp", "webapp")
 
-        // Handle incoming messages from the server
+        // Listen for messages
         socketIO.on("message", (message) => {
-            console.log("Received message from server:", message)
+            console.log("Received message:", message)
         })
 
-        // Clean up the socket connection when the component unmounts
+        // Send a message
+        socketIO.emit(
+            "webMessage",
+            "1",
+            `{"did":"1","dn":"Desk","dd":"deskLamp-b-0-0-0--deskLampBrightness-n-0-255-0--deskMonitor-b-0-0-1--","uid":"1124"}`
+        )
+        // socketIO.emit("webMessage", "2", "Hello, Device!")
+        // socketIO.emit("webMessage", "3", "Hello, Device!")
+
         return () => {
             socketIO.disconnect()
         }
