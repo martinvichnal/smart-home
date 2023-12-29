@@ -12,9 +12,13 @@ import { DeviceInterface } from "@/lib/interfaces"
 import { getAllDevices } from "@/actions/getAllDevices"
 import RenderDevice from "./components/RenderDevice"
 import postDeviceData from "@/actions/postDeviceData"
+import io from "socket.io-client"
 
 export default function DevicePage() {
+    const [socket, setSocket] = useState<any>()
     const [devices, setDevices] = useState<DeviceInterface[]>([]) // State for storing devices in array
+    const userId = "1124" // Replace with the actual user ID
+    const deviceId = "1001" // Replace with the actual device ID
 
     // Broadcast message to the device. PROP: stringified Device Data
     const handleDeviceChange = ({ did, dn, dd, uid }: DeviceInterface) => {
@@ -38,7 +42,11 @@ export default function DevicePage() {
     }
 
     useEffect(() => {
-        // console.log(devices)
+        console.log(devices)
+        // socket.emit("webappMessage", {
+        //     deviceId,
+        //     message: JSON.stringify(devices),
+        // })
     }, [devices])
 
     useEffect(() => {
@@ -50,28 +58,23 @@ export default function DevicePage() {
         }
         getDevices()
 
-        // // Connecting to websocket and handling messages events
-        // const socket = io("ws://192.168.0.28:5000")
-        // socket.on("connect", () => {
-        //     console.log("Successfully connected to the WebSocket server!")
-        // })
-        // socket.on("disconnect", () => {
-        //     console.log("Disconnected from the WebSocket server!")
-        // })
-        // // Listen for incoming messages
-        // socket.on("webMessage", (message) => {
-        //     // Handle messages from the device
-        //     // setMessages((prevMessages) => [...prevMessages, message])
-        // })
-        // socket.on("ackMessage", (message) => {
-        //     // Handle messages on acknowledgement from the device
-        //     // This is used to check if the device is recived the message or not
-        //     // setMessages((prevMessages) => [...prevMessages, message])
-        // })
-        // // Clean up the socket connection on unmount
-        // return () => {
-        //     socket.disconnect()
-        // }
+        const socketIO = io("ws://192.168.0.27:5000") // Connecting to websocket and handling messages events
+        setSocket(socketIO)
+        // Emit the "join" event when the component mounts
+        socketIO.emit("join", userId, "webapp")
+        const message = "Hello from the webapp!"
+        const id = "webapp"
+        socketIO.emit("webappMessage", { deviceId, message })
+
+        // Handle incoming messages from the server
+        socketIO.on("message", (message) => {
+            console.log("Received message from server:", message)
+        })
+
+        // Clean up the socket connection when the component unmounts
+        return () => {
+            socketIO.disconnect()
+        }
     }, [])
 
     return (
@@ -93,3 +96,20 @@ export default function DevicePage() {
         </div>
     )
 }
+
+// socket.on("connect", () => {
+//     console.log("Successfully connected to the WebSocket server!")
+// })
+// socket.on("disconnect", () => {
+//     console.log("Disconnected from the WebSocket server!")
+// })
+// // Listen for incoming messages
+// socket.on("webMessage", (message) => {
+//     // Handle messages from the device
+//     // setMessages((prevMessages) => [...prevMessages, message])
+// })
+// socket.on("ackMessage", (message) => {
+//     // Handle messages on acknowledgement from the device
+//     // This is used to check if the device is recived the message or not
+//     // setMessages((prevMessages) => [...prevMessages, message])
+// })

@@ -21,23 +21,28 @@
 #include <WebSocketsClient.h>
 #include <SocketIOclient.h>
 
-SmartHome desk("Desk", "1", "1124", "http://158.220.110.116:8080");
-SmartHome therm("Thermostat", "2", "1124", "http://158.220.110.116:8080");
-SmartHome bed("Bed", "3", "1124", "http://158.220.110.116:8080");
+#define userID "1124"
+#define apiServerURL "http://192.168.0.27:8080"
 
-// Desk variables:
+#define deskName "Desk"
+#define deskID "1"
 bool deskLamp = 0;
 int deskLampBrightness = 0; // 0 - 255
 bool deskMonitor = 0;
+SmartHome desk(deskName, deskID, userID, apiServerURL);
 
-// Thermostat:
+#define thermName "Thermostat"
+#define thermID "2"
 int thermostatTemperature = 0; // 0 - 100
 int thermostatHumidity = 0;    // 0 - 100
 bool thermostatPower = 0;
+SmartHome therm(thermName, thermID, userID, apiServerURL);
 
-// Bed:
+#define bedName "Bed"
+#define bedID "3"
 bool bedLamp = 0;
 int bedLampBrightness = 0; // 0 - 255
+SmartHome bed(bedName, bedID, userID, apiServerURL);
 
 void parseVariableData();  // Parsing data from variables for clear code
 void setGlobalVariables(); // Setting variables to values to fetch them to the server
@@ -53,6 +58,7 @@ Functions declarations
 void connectToWifi(); // Connecting to WiFi
 void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length);
 void handleWebSocketEvent(uint8_t *payload, size_t length);
+void joinWebSocketGroup(String uid, String did);
 
 // Socket.IO functions
 SocketIOclient ws;
@@ -199,7 +205,6 @@ void parseVariableData()
   bedLampBrightness = bed.getVariableValue("bedLampBrightness");
 }
 
-
 void setGlobalVariables()
 {
   // Setting global variables to values to fetch them to the server
@@ -300,6 +305,9 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
  */
 void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length)
 {
+  String userJoinID = userID;
+  String deskJoinID = deskID;
+  String joinEventDesk = "[\"join\", \"" + userJoinID + "\", \"" + deskJoinID + "\"]";
   switch (type)
   {
   case sIOtype_DISCONNECT:
@@ -308,6 +316,7 @@ void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length
   case sIOtype_CONNECT:
     Serial.printf("WS - [IOc] Connected to url: %s\n", payload);
     ws.send(sIOtype_CONNECT, "/");
+    ws.sendEVENT(joinEventDesk);
     break;
   case sIOtype_EVENT:
     Serial.printf("WS - [IOc] get event: %s\n", payload);
@@ -326,4 +335,19 @@ void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length
     Serial.printf("WS - [IOc] get binary ack: %u\n", length);
     break;
   }
+}
+
+void joinWebSocketGroup(String uid, String did)
+{
+  // Sending join event to the websocket server
+  String userJoinID = userID;
+  String deskJoinID = deskID;
+  String thermJoinID = thermID;
+  String bedJoinID = bedID;
+  String joinEventDesk = "[\"join\", \"" + userJoinID + "\", \"" + deskJoinID + "\"]";
+  String joinEventTherm = "[\"join\", \"" + userJoinID + "\", \"" + thermJoinID + "\"]";
+  String joinEventBed = "[\"join\", \"" + userJoinID + "\", \"" + bedJoinID + "\"]";
+  ws.sendEVENT(joinEventDesk);
+  ws.sendEVENT(joinEventTherm);
+  ws.sendEVENT(joinEventBed);
 }
