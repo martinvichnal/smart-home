@@ -168,6 +168,24 @@ In order to use the system you have to configure the webapp and the ESP32 to con
 ## Servers
 
 ### Websocket
+At the top, the necessary modules are imported. Express is a web application framework for Node.js, designed for building web applications and APIs. Socket.IO is a JavaScript library for real-time web applications. It enables real-time, bidirectional, and event-based communication between the browser and the server.
+
+The `connectedClients` Map is used to keep track of all connected clients. Each client is identified by a unique `clientId` which is a combination of the user's `userId`, `deviceId`, `clientType`, and the socket's `id`.
+
+The `sendConnectionStatusEvent` function is used to send a `connectionStatus` event to a specific socket. It sends an object containing an array of `connectedDevices` for a specific `userId`.
+
+The `io.on("connection", (socket) => {...})` block is where the server handles a new client connection. Inside this block, several event listeners are set up on the `socket` object to handle different types of events.
+
+The `join` event is used when a client wants to join the server. The client sends its `userId`, `deviceId`, and `clientType` to the server. The server then stores this information in the `socket` object and the `connectedClients` Map.
+
+If the `clientType` is `webapp`, the server sets up a `webMessage` event listener on the `socket`. When a `webMessage` event is received, the server tries to find the target device's socket and sends a `message` event to it.
+
+If the `clientType` is `device`, the server sets up a `deviceMessage` event listener on the `socket`. When a `deviceMessage` event is received, the server sends a message event to all webapp `sockets` associated with the `userId`.
+
+The `disconnect` event is used when a client disconnects from the server. The server removes the client's information from the `connectedClients` Map.
+
+Finally, the server starts listening on a specific port for incoming connections.
+
 
 ### REST API
 
