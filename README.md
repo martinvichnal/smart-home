@@ -25,12 +25,12 @@ This system is a dynamically changeable smart home system built with React TypeS
 - [Hardware Requirements](#hardware-requirements)
 - [Software Dependencies](#software-dependencies)
 - [Installation and usage](#installation-and-usage)
-   * [WebApp](#webapp)
-   * [Create an IoT device](#create-an-iot-device)
-   * [Servers](#servers)
-      + [WebSocket](#websocket)
-      + [API](#api)
-      + [MSSQL](#mssql)
+      + [Create an IoT device](#create-an-iot-device)
+      + [WebApp](#webapp)
+      + [Servers](#servers)
+         - [WebSocket](#websocket)
+         - [API](#api)
+         - [MSSQL](#mssql)
 - [Configuration](#configuration)
 - [How it works ?](#how-it-works-)
    * [System](#system)
@@ -38,6 +38,13 @@ This system is a dynamically changeable smart home system built with React TypeS
    * [IoT Device](#iot-device)
    * [Servers](#servers-1)
       + [Websocket](#websocket-1)
+      + [WebSocket API Documentation](#websocket-api-documentation)
+         - [Connection](#connection)
+         - [Joining](#joining)
+         - [Sending Messages](#sending-messages)
+         - [Receiving Messages](#receiving-messages)
+         - [Connection Status](#connection-status)
+         - [Disconnecting](#disconnecting)
       + [REST API](#rest-api)
          - [Database](#database)
 - [Acknowledgements / Source](#acknowledgements--source)
@@ -150,19 +157,17 @@ In order to use the system you have to configure the webapp and the ESP32 to con
 ---
 ## System
 
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png)
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png)
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Data-flow.png)
+
 
 ---
 ## User Interface
 
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png)
+
 
 ---
 ## IoT Device
 
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png)
+
 
 ---
 ## Servers
@@ -186,11 +191,75 @@ The `disconnect` event is used when a client disconnects from the server. The se
 
 Finally, the server starts listening on a specific port for incoming connections.
 
+### WebSocket API Documentation
+
+#### Connection
+
+To connect to the WebSocket server, create a new WebSocket instance in your client-side JavaScript:
+
+```jsx
+const socket = io('<http://localhost:5000>');
+```
+
+Replace `'<http://localhost:5000>'` with the URL of your WebSocket server.
+
+#### Joining
+
+After connecting, you should emit a "join" event to the server. This event should include your user ID, device ID, and client type:
+
+```jsx
+socket.emit('join', userId, deviceId, clientType);
+```
+
+- `userId` (string): The ID of the user.
+- `deviceId` (string): The ID of the device. This is not required for webapp clients.
+- `clientType` (string): The type of the client. This should be either "webapp" or "device".
+
+#### Sending Messages
+
+To send a message, emit a `${clientType}Message` event to the server. This event should include the target device ID and the message:
+
+```jsx
+socket.emit(`${clientType}Message`, targetDeviceId, message);
+```
+
+- `targetDeviceId` (string): The ID of the target device. This is required for webapp clients.
+- `message` (string): The message to send.
+
+#### Receiving Messages
+
+To receive messages, listen for the "message" event:
+
+```jsx
+socket.on('message', (message) => {
+  console.log('Received message:', message);
+});
+```
+
+#### Connection Status
+
+To receive updates about the connection status, listen for the "connectionStatus" event:
+
+```jsx
+socket.on('connectionStatus', (data) => {
+  console.log('Connected devices:', data.connectedDevices);
+});
+
+```
+
+#### Disconnecting
+
+To disconnect from the server, use the `disconnect` method:
+
+```jsx
+socket.disconnect();
+```
+
+Please note that this is a basic API documentation. Depending on your application's requirements, you might need to add more events or data fields.
 
 ### REST API
 
 #### Database
-[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Database-Structure.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Database-Structure.png)
 
 
 ```JavaScript
