@@ -59,20 +59,35 @@ export default function DevicePage() {
 
         // Join the server
         socketIO.emit("join", "1124", "webapp", "webapp")
+        socketIO.emit("join", "1124", "1", "device")
+        socketIO.emit("join", "1124", "2", "device")
+        socketIO.emit("join", "1124", "3", "device")
 
         // Listen for messages
         socketIO.on("message", (message) => {
             console.log("Received message:", message)
         })
 
+        socketIO.on("connectionStatus", (message) => {
+            console.log("Received connectionStatus message:", message)
+        })
+
         // Send a message
         socketIO.emit(
-            "webMessage",
+            "webappMessage",
+            "1001",
+            `{"did":"1","dn":"Desk","dd":"deskLamp-b-0-0-0--deskLampBrightness-n-0-255-0--deskMonitor-b-0-0-1--","uid":"1124"}`
+        )
+        socketIO.emit(
+            "webappMessage",
             "1",
             `{"did":"1","dn":"Desk","dd":"deskLamp-b-0-0-0--deskLampBrightness-n-0-255-0--deskMonitor-b-0-0-1--","uid":"1124"}`
         )
-        // socketIO.emit("webMessage", "2", "Hello, Device!")
-        // socketIO.emit("webMessage", "3", "Hello, Device!")
+        socketIO.emit(
+            "deviceMessage",
+            "webapp",
+            `{"did":"1","dn":"Desk","dd":"deskLamp-b-0-0-0--deskMonitor-b-0-0-1--","uid":"1124"}`
+        )
 
         return () => {
             socketIO.disconnect()
