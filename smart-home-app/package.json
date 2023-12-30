@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@nextui-org/react": "^2.2.9",
+        "@types/socket.io-client": "^3.0.0",
         "axios": "^1.6.3",
         "framer-motion": "^10.16.16",
         "next": "14.0.4",

@@ -21,6 +21,8 @@
 #include <WebSocketsClient.h>
 #include <SocketIOclient.h>
 
+#define DEBUG false
+
 #define userID "1124"
 #define apiServerURL "http://192.168.0.27:8080"
 
@@ -48,7 +50,7 @@ void parseVariableData();  // Parsing data from variables for clear code
 void setGlobalVariables(); // Setting variables to values to fetch them to the server
 
 #define NUM_LEDS 10
-#define DATA_PIN 5
+#define DATA_PIN 4
 
 CRGB leds[NUM_LEDS];
 
@@ -148,13 +150,12 @@ void loop()
     bedLampBrightness = random(0, 256);
     setGlobalVariables();
 
-    String dataDesk = desk.prepareWebSocketData();
-    // String dataTherm = therm.prepareWebSocketData();
-    // String dataBed = bed.prepareWebSocketData();
-
-    ws.sendEVENT(dataDesk);
-    // ws.sendEVENT(dataTherm);
-    // ws.sendEVENT(dataBed);
+    // String dataDesk = desk.prepareWebSocketData();
+    String dataTherm = therm.prepareWebSocketData();
+    String dataBed = bed.prepareWebSocketData();
+    // ws.sendEVENT(dataDesk);
+    ws.sendEVENT(dataTherm);
+    ws.sendEVENT(dataBed);
   }
 }
 
@@ -226,6 +227,11 @@ void setGlobalVariables()
  * This function is responsible for deserializing the payload of a WebSocket event into
  * the event name and event data. It then performs specific actions based on the event name.
  *
+ * "doc" used for parsing the payload data. It contains the event name and event data.
+ *    - "doc[0]" contains the event name.
+ *    - "doc[1]" contains the event data in JSON format. - Passed over as "jsonData"
+ * "jsonData" used for parsing the data.
+ *
  * @param payload The payload of the WebSocket event.
  * @param length The length of the payload.
  */
@@ -248,12 +254,15 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
   }
 
   String eventName = doc[0];
-  Serial.printf("WS - [IOc] event name: %s\n", eventName.c_str());
-  Serial.printf("WS - [IOc] payload: %s\n", doc[1].as<String>().c_str());
-
+#if DEBUG
+  Serial.printf("WS - [IOc] event name: %s\n", eventName.c_str());        // WS - [IOc] event name: message
+  Serial.printf("WS - [IOc] payload: %s\n", doc[1].as<String>().c_str()); // WS - [IOc] payload: {"did":"1","dn":"Desk","dd":"deskLamp-b-0-0-1--deskLampBrightness-n-0-255-0--deskMonitor-b-0-0-0","uid":"1124"}
+#endif
   if (eventName == "message")
   {
+    #if DEBUG
     Serial.println(doc[1].as<String>());
+    #endif
     DynamicJsonDocument jsonData(1024);
     DeserializationError errorJson = deserializeJson(jsonData, doc[1].as<String>());
     if (errorJson)
@@ -263,21 +272,22 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
       return;
     }
 
-    JsonObject device = jsonData[0];
-    String deviceName = device["dn"].as<String>();
+    String deviceName = jsonData["dn"].as<String>();
+    #if DEBUG
     Serial.printf("WS - [IOc] device name: %s\n", deviceName.c_str());
+    #endif
 
     if (deviceName == "Desk")
     {
-      desk.processDeviceData(doc[1]);
+      desk.processDeviceData("[" + doc[1].as<String>() + "]");
     }
     else if (deviceName == "Bed")
     {
-      bed.processDeviceData(doc[1]);
+      bed.processDeviceData("[" + doc[1].as<String>() + "]");
     }
     else if (deviceName == "Thermostat")
     {
-      therm.processDeviceData(doc[1]);
+      therm.processDeviceData("[" + doc[1].as<String>() + "]");
     }
     else
     {
@@ -314,7 +324,7 @@ void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length
     joinWebSocketGroup();
     break;
   case sIOtype_EVENT:
-    Serial.printf("WS - [IOc] get event: %s\n", payload);
+    // Serial.printf("WS - [IOc] get event: %s\n", payload);
     handleWebSocketEvent(payload, length);
     break;
   case sIOtype_ACK:

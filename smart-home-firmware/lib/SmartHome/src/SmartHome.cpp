@@ -285,16 +285,22 @@ void SmartHome::validateHome()
         String uid = getUserID();
 
         String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
+#if DEBUG
         Serial.println("VALIDATE - " + serverUrl + "/api/devices" + " body: " + jsonOutput);
+#endif
 
         int httpResponseCode = http.POST(String(jsonOutput));
         if (httpResponseCode > 0)
         {
+#if DEBUG
             Serial.printf("VALIDATE - HTTP POST success, response code: %d\n", httpResponseCode);
+#endif
         }
         else
         {
+#if DEBUG
             Serial.printf("VALIDATE - ERROR! - HTTP POST failed, response code: %d\n", httpResponseCode);
+#endif
         }
 
         http.end();
@@ -340,8 +346,10 @@ void SmartHome::push()
     {
         data += variable.toString() + "--";
     }
+#if DEBUG
     Serial.println("PUSH - Sending data to server: " + data);
     Serial.println();
+#endif
     sendToServer(data);
 }
 
@@ -358,10 +366,12 @@ void SmartHome::push(int interval)
         {
             data += variable.toString() + "--";
         }
+#if DEBUG
         Serial.println();
         Serial.print("PUSH - Sending data to server: ");
         Serial.println(data);
         Serial.println();
+#endif
         sendToServer(data);
 
         previousPushMillis = millis();
@@ -387,16 +397,22 @@ void SmartHome::sendToServer(String data)
     String uid = getUserID();
 
     String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
+#if DEBUG
     Serial.println("API SEND - " + serverUrl + "/api/devices" + " body: " + jsonOutput);
+#endif
 
     int httpResponseCode = http.PUT(String(jsonOutput));
     if (httpResponseCode > 0)
     {
+#if DEBUG
         Serial.printf("API SEND - HTTP PUT success, response code: %d\n", httpResponseCode);
+#endif
     }
     else
     {
+#if DEBUG
         Serial.printf("API SEND - ERROR! - HTTP PUT failed, response code: %d\n", httpResponseCode);
+#endif
     }
 
     http.end();
@@ -462,13 +478,13 @@ bool SmartHome::processDeviceData(String data)
                     String deviceName = device["dn"].as<String>();
                     String deviceData = device["dd"].as<String>();
                     String userId = device["uid"].as<String>();
-
+#if DEBUG
                     Serial.println("processDeviceData - Parsed data from server:");
                     Serial.println("processDeviceData - Device ID: " + deviceId);
                     Serial.println("processDeviceData - Device name: " + deviceName);
                     Serial.println("processDeviceData - Device data: " + deviceData);
                     Serial.println("processDeviceData - User ID: " + userId);
-
+#endif
                     // TODO: process device data into their corresponding variables
                     int startIndex = 0;
 
@@ -504,11 +520,11 @@ bool SmartHome::processDeviceData(String data)
                         int variableValue = 0;
                         if (variableType == "b")
                         {
-                            if(variableData == "false" || variableData == "0")
+                            if (variableData == "false" || variableData == "0")
                             {
                                 variableValue = 0;
                             }
-                            else if(variableData == "true" || variableData == "1")
+                            else if (variableData == "true" || variableData == "1")
                             {
                                 variableValue = 1;
                             }
@@ -517,13 +533,13 @@ bool SmartHome::processDeviceData(String data)
                         {
                             variableValue = variableData.toInt();
                         }
-                        
-                        
 
-                        // Set the variables using the setVariableValue function
-                        // setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
+// Set the variables using the setVariableValue function
+// setVariableValue(variableName, variableType.charAt(0), variableMinValue, variableMaxValue, variableValue);
+#if DEBUG
                         Serial.println("processDeviceData - Parsed variable data:");
                         Serial.println("processDeviceData - Variable name: " + variableName + ", Variable type: " + variableType + ", Variable min value: " + String(variableMinValue) + ", Variable max value: " + String(variableMaxValue) + ", Variable value: " + String(variableValue));
+#endif
                         // Set variable
                         setVariableValue(variableName, variableValue);
 
@@ -574,9 +590,10 @@ String SmartHome::prepareWebSocketData()
     String jsonOutput = "{\"did\":\"" + did + "\",\"dn\":\"" + dn + "\",\"dd\":\"" + dd + "\",\"uid\":\"" + uid + "\"}";
 
     array.add("deviceMessage"); // WS event name
-    array.add(jsonOutput);      // WS event data
+    array.add("webapp");
+    array.add(jsonOutput); // WS event data
     serializeJson(doc, output);
 
-    Serial.println("WS - Creating JSON for WebSocket: " + output);
+    // Serial.println("WS - Creating JSON for WebSocket: " + output);
     return output;
 }

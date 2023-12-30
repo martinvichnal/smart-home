@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
                     )
                     return
                 }
-            } else {
+            } else if (clientType === "device") {
                 // If the message is from a device, send it to all associated webapps
                 targetClients = Array.from(connectedClients.values()).filter(
                     (client) =>
@@ -95,37 +95,3 @@ const PORT = 5000
 server.listen(PORT, () => {
     console.log(`Socket.io server is running on port ${PORT}`)
 })
-
-// if (clientType === "webapp") {
-//     socket.on("webMessage", (deviceId, message) => {
-//         let targetClients = Array.from(connectedClients.values()).filter(
-//             (client) =>
-//                 client.userId === userId &&
-//                 client.deviceId === deviceId &&
-//                 client.clientType === "webapp"
-//         )
-//         if (targetClients) {
-//             targetClients.socket.emit("message", message)
-//             console.log(
-//                 `WEBMESSAGE - Sending to (${targetClients}) (${deviceId}): ${message}`
-//             )
-//         } else {
-//             console.log(
-//                 `WEBMESSAGE | ERROR- Target device not found for (${deviceId})`
-//             )
-//         }
-//     })
-// } else if (clientType === "device") {
-//     socket.on("deviceMessage", (message) => {
-//         let targetClients = Array.from(connectedClients.values()).filter(
-//             (client) =>
-//                 client.userId === userId && client.clientType === "webapp"
-//         )
-//         targetClients.forEach((client) => {
-//             client.socket.emit("message", message)
-//             console.log(
-//                 `DEVICEMESSAGE - Sending to (${client.deviceId}): ${message}`
-//             )
-//         })
-//     })
-// }
