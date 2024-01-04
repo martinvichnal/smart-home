@@ -21,7 +21,54 @@
 #include <WebSocketsClient.h>
 #include <SocketIOclient.h>
 
-#define DEBUG false
+// ---------------------------------------------------------------------------------------------
+
+#define DEBUG 1
+#define DEBUG_WS 0
+
+#if DEBUG
+#define D_SerialBegin(...) Serial.begin(__VA_ARGS__);
+#define D_print(...) Serial.print(__VA_ARGS__)
+#define D_println(...) Serial.println(__VA_ARGS__)
+#define D_write(...) Serial.write(__VA_ARGS__)
+#else
+#define D_SerialBegin(...)
+#define D_print(...)
+#define D_println(...)
+#define D_write(...)
+#endif
+
+#if DEBUG_WS
+#define DWS_print(...)         \
+  {                            \
+    Serial.print("WS - ");     \
+    Serial.print(__VA_ARGS__); \
+  }
+#define DWS_println(...)         \
+  {                              \
+    Serial.print("WS - ");       \
+    Serial.println(__VA_ARGS__); \
+  }
+#define DWS_error(...)           \
+  {                              \
+    Serial.print("WS - ");       \
+    Serial.print("ERROR: ");     \
+    Serial.println(__VA_ARGS__); \
+  }
+#define DWS_info(...)            \
+  {                              \
+    Serial.print("WS - ");       \
+    Serial.print("INFO: ");      \
+    Serial.println(__VA_ARGS__); \
+  }
+#else
+#define DWS_print(...)
+#define DWS_println(...)
+#define DWS_error(...)
+#define DWS_info(...)
+#endif
+
+// ---------------------------------------------------------------------------------------------
 
 #define userID "1124"
 #define apiServerURL "http://192.168.0.27:8080"
@@ -57,6 +104,8 @@ CRGB leds[NUM_LEDS];
 /*
 Functions declarations
 */
+void core1Task(void *pvParameters);
+void core2Task(void *pvParameters);
 void connectToWifi(); // Connecting to WiFi
 void webSocketEvents(socketIOmessageType_t type, uint8_t *payload, size_t length);
 void handleWebSocketEvent(uint8_t *payload, size_t length);
@@ -77,7 +126,7 @@ SocketIOclient ws;
 */
 void setup()
 {
-  Serial.begin(115200);
+  D_SerialBegin(115200);
   delay(1000);
   connectToWifi();
 
@@ -104,10 +153,50 @@ void setup()
   // WebSocket initialization
   ws.begin(webSocketServerAddress, webSocketServerPort, "/socket.io/?EIO=4");
   ws.onEvent(webSocketEvents);
+
+  xTaskCreatePinnedToCore(
+      core1Task,
+      "Core1_Task",
+      10000,
+      NULL,
+      1,
+      NULL,
+      1);
+
+  xTaskCreatePinnedToCore(
+      core2Task,
+      "Core2_Task",
+      10000,
+      NULL,
+      1,
+      NULL,
+      0);
 }
 
 int count = 0;
 unsigned long messageTimestamp = 0;
+
+void core1Task(void *pvParameters)
+{
+  // Core 1 initialization for the lamp
+
+  while (1)
+  {
+    // Core 1 main loop for the lamp
+    // Perform tasks related to the lamp's functionality
+  }
+}
+
+void core2Task(void *pvParameters)
+{
+  // Core 2 initialization for Wi-Fi and communication
+
+  while (1)
+  {
+    // Core 2 main loop for Wi-Fi and communication
+    // Handle communication tasks, such as receiving commands or sending data
+  }
+}
 
 /*
  /$$        /$$$$$$   /$$$$$$  /$$$$$$$
@@ -260,9 +349,9 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
 #endif
   if (eventName == "message")
   {
-    #if DEBUG
+#if DEBUG
     Serial.println(doc[1].as<String>());
-    #endif
+#endif
     DynamicJsonDocument jsonData(1024);
     DeserializationError errorJson = deserializeJson(jsonData, doc[1].as<String>());
     if (errorJson)
@@ -273,9 +362,9 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
     }
 
     String deviceName = jsonData["dn"].as<String>();
-    #if DEBUG
+#if DEBUG
     Serial.printf("WS - [IOc] device name: %s\n", deviceName.c_str());
-    #endif
+#endif
 
     if (deviceName == "Desk")
     {

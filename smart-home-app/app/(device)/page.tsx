@@ -56,7 +56,7 @@ export default function DevicePage() {
         getDevices()
 
         // Connecting to websocket and handling messages events
-        const socketIO = io("ws://192.168.0.27:5000")
+        const socketIO = io(`${process.env.WS_SERVER_IP}`)
         setSocket(socketIO)
         // Join the server
         socketIO.emit("join", "1124", "webapp", "webapp")
