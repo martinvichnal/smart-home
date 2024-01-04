@@ -20,13 +20,15 @@
 #include <sstream>
 #include <WebSocketsClient.h>
 #include <SocketIOclient.h>
+#include <AntiDelay.h>
 
 // ---------------------------------------------------------------------------------------------
 
 #define DEBUG 1
 #define DEBUG_WS 0
+#define DEBUGPrint 1
 
-#if DEBUG
+#if DEBUGPrint
 #define D_SerialBegin(...) Serial.begin(__VA_ARGS__);
 #define D_print(...) Serial.print(__VA_ARGS__)
 #define D_println(...) Serial.println(__VA_ARGS__)
@@ -71,7 +73,7 @@
 // ---------------------------------------------------------------------------------------------
 
 #define userID "1124"
-#define apiServerURL "http://192.168.0.27:8080"
+#define apiServerURL ApiServerAddress
 
 #define deskName "Desk"
 #define deskID "1"
@@ -128,10 +130,6 @@ void setup()
 {
   D_SerialBegin(115200);
   delay(1000);
-  connectToWifi();
-
-  FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS); // GRB ordering is typical
-  FastLED.setBrightness(100);
 
   desk.addVariableBool(13, "deskLamp", deskLamp);
   desk.addVariableNumber(14, "deskLampBrightness", 0, 255, deskLampBrightness);
@@ -144,6 +142,68 @@ void setup()
   bed.addVariableBool(19, "bedLamp", bedLamp);
   bed.addVariableNumber(20, "bedLampBrightness", 0, 255, bedLampBrightness);
 
+  xTaskCreatePinnedToCore(
+      core1Task,
+      "Core1_Task",
+      20000,
+      NULL,
+      1,
+      NULL,
+      1);
+
+  xTaskCreatePinnedToCore(
+      core2Task,
+      "Core2_Task",
+      20000,
+      NULL,
+      1,
+      NULL,
+      0);
+}
+
+AntiDelay setRandom(10000);
+
+void core1Task(void *pvParameters)
+{
+  // Core 1 initialization for the lamp
+  FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS); // GRB ordering is typical
+  FastLED.setBrightness(100);
+  while (1)
+  {
+    // Core 1 main loop for the lamp
+    // Perform tasks related to the lamp's functionality
+
+    fill_solid(leds, 10, CRGB(255, 0, 0));
+
+    if (deskLamp)
+      FastLED.setBrightness(deskLampBrightness);
+    else
+      FastLED.setBrightness(0);
+
+    FastLED.show();
+
+    if (setRandom)
+    {
+      Serial.println("Setting random values");
+      deskMonitor = random(0, 2);
+      thermostatTemperature = random(0, 101);
+      thermostatHumidity = random(0, 101);
+      thermostatPower = random(0, 2);
+
+      bedLamp = random(0, 2);
+      bedLampBrightness = random(0, 256);
+      setGlobalVariables();
+    }
+  }
+}
+
+AntiDelay setDataInterval(10000);
+
+void core2Task(void *pvParameters)
+{
+  // Core 2 initialization for Wi-Fi and communication
+  connectToWifi();
+
   // Validate homes
   desk.validateHome();
   therm.validateHome();
@@ -154,47 +214,24 @@ void setup()
   ws.begin(webSocketServerAddress, webSocketServerPort, "/socket.io/?EIO=4");
   ws.onEvent(webSocketEvents);
 
-  xTaskCreatePinnedToCore(
-      core1Task,
-      "Core1_Task",
-      10000,
-      NULL,
-      1,
-      NULL,
-      1);
-
-  xTaskCreatePinnedToCore(
-      core2Task,
-      "Core2_Task",
-      10000,
-      NULL,
-      1,
-      NULL,
-      0);
-}
-
-int count = 0;
-unsigned long messageTimestamp = 0;
-
-void core1Task(void *pvParameters)
-{
-  // Core 1 initialization for the lamp
-
-  while (1)
-  {
-    // Core 1 main loop for the lamp
-    // Perform tasks related to the lamp's functionality
-  }
-}
-
-void core2Task(void *pvParameters)
-{
-  // Core 2 initialization for Wi-Fi and communication
-
   while (1)
   {
     // Core 2 main loop for Wi-Fi and communication
     // Handle communication tasks, such as receiving commands or sending data
+    ws.loop();
+    parseVariableData();
+    setGlobalVariables();
+
+    if (setDataInterval)
+    {
+      Serial.println("Sending to server");
+      // String dataDesk = desk.prepareWebSocketData();
+      String dataTherm = therm.prepareWebSocketData();
+      String dataBed = bed.prepareWebSocketData();
+      // ws.sendEVENT(dataDesk);
+      ws.sendEVENT(dataTherm);
+      ws.sendEVENT(dataBed);
+    }
   }
 }
 
@@ -208,44 +245,8 @@ void core2Task(void *pvParameters)
 | $$$$$$$$|  $$$$$$/|  $$$$$$/| $$
 |________/ \______/  \______/ |__/
 */
-unsigned long previousMillis = 0;
-const unsigned long interval = 10000; // Delay interval in milliseconds
-
 void loop()
 {
-  ws.loop();
-  parseVariableData();
-  setGlobalVariables();
-
-  fill_solid(leds, 10, CRGB(255, 0, 0));
-
-  if (deskLamp)
-    FastLED.setBrightness(deskLampBrightness);
-  else
-    FastLED.setBrightness(0);
-
-  FastLED.show();
-
-  if (millis() - previousMillis >= interval)
-  {
-    previousMillis = millis();
-
-    deskMonitor = random(0, 2);
-    thermostatTemperature = random(0, 101);
-    thermostatHumidity = random(0, 101);
-    thermostatPower = random(0, 2);
-
-    bedLamp = random(0, 2);
-    bedLampBrightness = random(0, 256);
-    setGlobalVariables();
-
-    // String dataDesk = desk.prepareWebSocketData();
-    String dataTherm = therm.prepareWebSocketData();
-    String dataBed = bed.prepareWebSocketData();
-    // ws.sendEVENT(dataDesk);
-    ws.sendEVENT(dataTherm);
-    ws.sendEVENT(dataBed);
-  }
 }
 
 /*
@@ -275,9 +276,9 @@ void connectToWifi()
     delay(100);
   }
 
-  Serial.println("\nConnected to the WiFi network");
-  Serial.print("Local ESP32 IP: ");
-  Serial.println(WiFi.localIP());
+  D_println("\nConnected to the WiFi network");
+  D_println("Local ESP32 IP: ");
+  D_println(WiFi.localIP());
 }
 
 void parseVariableData()
@@ -333,7 +334,7 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
   {
     payload = (uint8_t *)sptr;
   }
-  DynamicJsonDocument doc(1024);
+  DynamicJsonDocument doc(256);
   DeserializationError errorDoc = deserializeJson(doc, payload, length);
   if (errorDoc)
   {
@@ -352,7 +353,7 @@ void handleWebSocketEvent(uint8_t *payload, size_t length)
 #if DEBUG
     Serial.println(doc[1].as<String>());
 #endif
-    DynamicJsonDocument jsonData(1024);
+    DynamicJsonDocument jsonData(256);
     DeserializationError errorJson = deserializeJson(jsonData, doc[1].as<String>());
     if (errorJson)
     {
@@ -442,6 +443,6 @@ void joinWebSocketGroup()
   String joinEventTherm = "[\"join\", \"" + userJoinID + "\", \"" + thermJoinID + "\", \"" + "device" + "\"]";
   String joinEventBed = "[\"join\", \"" + userJoinID + "\", \"" + bedJoinID + "\", \"" + "device" + "\"]";
   ws.sendEVENT(joinEventDesk);
-  // ws.sendEVENT(joinEventTherm);
-  // ws.sendEVENT(joinEventBed);
+  ws.sendEVENT(joinEventTherm);
+  ws.sendEVENT(joinEventBed);
 }
