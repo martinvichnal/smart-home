@@ -50,6 +50,10 @@ This system is a dynamically changeable smart home system built with React TypeS
 - [Acknowledgements / Source](#acknowledgements--source)
 
 ---
+# Fundamental Operation
+This is the section for the basics of how it works and explaining through diagrams
+
+---
 # Features
 - Dynamically add custom variables to the system
 - Fast and reliable communication
@@ -71,7 +75,33 @@ This system is a dynamically changeable smart home system built with React TypeS
 - On the Webapp side you can find the dependencies in the package.json file
 
 ---
-# Installation and usage
+# Diagrams 
+
+## Diagram color code
+All the diagrams that are shown below are color coded with the following code rule:
+
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Color-codes.png)
+
+
+## System diagram
+This is the basic system connection diagram.
+
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/System-Diagram.png)
+
+
+## IoT device diagram
+This is the basic IoT devices diagram.
+
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/IoT-Devices-Diagram.png)
+
+
+## Webapp diagram
+
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png"/>](https://github.com/martinvichnal/smart-home/blob/main/doc/Webapp-Diagram.png)
+
+
+---
+# Installation
 1. Clone the repository
 2. Configure and install the components
 ### Create an IoT device
@@ -160,7 +190,77 @@ In order to use the system you have to configure the webapp and the ESP32 to con
 
 
 ---
-## User Interface
+## User Interface - Webapp
+
+### Hooks
+I created some custom hooks to make the overall code easily readable and accessable. These hooks can be seen below:
+
+---
+
+#### useAddData
+This hook is just containing a simple function
+```tsx
+const addData = async ({ uid, uName, uIsAuth }: userInfoType) => {}
+```
+that adds values to the database whith the following parameters:
+```tsx
+export type userInfoType = {
+    id?: string // id: id from Firebase database
+    uid?: string // uid: uid from Firebase authentication
+    uName?: string // uName: name from Firebase authentication
+    uIsAuth?: boolean // uIsAuth: isAuth from Firebase authentication
+}
+```
+
+---
+
+#### useDeleteData
+
+---
+
+#### useGetData
+This is the main hook for fetching the data from the database. This diagram below shows how the hook should be used:
+
+[<img src="https://github.com/martinvichnal/smart-home/blob/main/doc/useGetData.png" width=500/>](https://github.com/martinvichnal/smart-home/blob/main/doc/useGetData.png.png)
+
+This hook contains the following variables and fucntions:
+Variables
+```tsx
+const [devices, setDevices] = useState<deviceInfoType[]>([])
+const [users, setUsers] = useState<userInfoType[]>([])
+const [data, setData] = useState<userInfoType[]>([])
+```
+And fucntios
+```tsx
+const getUserData = async () => {}
+const getDeviceData = async () => {}
+```
+All the fucntions and main variables are available with this hook.
+
+This hook has also 3 useEffect react hooks in order to fix sync issues with React structure.
+
+The getUserData is the first thing this hook is calling. It gets user data from database with the given dataQuery `(Where the uid is equal to the current user's uid)` and sets the user state to the fetched data. This function Is called only on mount or when getUserData is called. With the help of a useEffect we wait for the user state to set its value then calling the getDeviceData. This fucntion gets data from the database when the database data has changed and sets the device state to the fetched data. This getDoc uses a sub collection reference. This fucntion also subscribing on the database change so we dont need to call it again.
+
+---
+
+#### useGetUserInfo
+This is a simple custom hook that gets user information from the local web storage. The data is added every time the user is in the authentication page.
+
+Example:
+```tsx
+const { uid, uIsAuth } = useGetUserInfo()
+```
+
+The user info from the local storage looks like this:
+```JSON
+{
+    "uid": "jfE3189r5Gsjac8763VsahEfgj",
+    "uName": "John Doe",
+    "uPhoto": "*url from google*",
+    "uIsAuth": false
+    "id": "Yq4Qt1S1muRZuBzEuYhL"
+}
+```
 
 
 
