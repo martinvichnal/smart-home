@@ -21,20 +21,38 @@ This system is a dynamically changeable smart home system built with React TypeS
 - [Smart home system](#smart-home-system)
 - [Introduction](#introduction)
 - [Table of Contents](#table-of-contents)
+- [Fundamental Operation](#fundamental-operation)
 - [Features](#features)
 - [Hardware Requirements](#hardware-requirements)
 - [Software Dependencies](#software-dependencies)
-- [Installation and usage](#installation-and-usage)
-      + [Create an IoT device](#create-an-iot-device)
-      + [WebApp](#webapp)
-      + [Servers](#servers)
-         - [WebSocket](#websocket)
-         - [API](#api)
-         - [MSSQL](#mssql)
+- [Diagrams ](#diagrams)
+   * [Diagram color code](#diagram-color-code)
+   * [System diagram](#system-diagram)
+   * [IoT device diagram](#iot-device-diagram)
+   * [Webapp diagram](#webapp-diagram)
+- [Installation](#installation)
+   * [Create an IoT device](#create-an-iot-device)
+   * [WebApp](#webapp)
+   * [Servers](#servers)
+      + [WebSocket](#websocket)
+      + [API](#api)
+      + [MSSQL](#mssql)
 - [Configuration](#configuration)
+      + [Kubernetes and docker](#kubernetes-and-docker)
+         - [How to create:](#how-to-create)
+         - [Docker](#docker)
+         - [Good to know docker parancsok](#good-to-know-docker-parancsok)
+         - [Kubernetes](#kubernetes)
+         - [Kubernetes Dashboard](#kubernetes-dashboard)
+         - [Update Server from git](#update-server-from-git)
 - [How it works ?](#how-it-works-)
    * [System](#system)
-   * [User Interface](#user-interface)
+   * [User Interface - Webapp](#user-interface---webapp)
+      + [Hooks](#hooks)
+         - [useAddData](#useadddata)
+         - [useDeleteData](#usedeletedata)
+         - [useGetData](#usegetdata)
+         - [useGetUserInfo](#usegetuserinfo)
    * [IoT Device](#iot-device)
    * [Servers](#servers-1)
       + [Websocket](#websocket-1)
@@ -104,7 +122,7 @@ This is the basic IoT devices diagram.
 # Installation
 1. Clone the repository
 2. Configure and install the components
-### Create an IoT device
+## Create an IoT device
 - Create a virtual smart home with the SmartHome class with your server urls and device properties:
 ```cpp
 SmartHome desk("Desk", "1", "1", "http://0.0.0.0:0000");
@@ -133,23 +151,23 @@ String dataDesk = desk.prepareWebSocketData();
 ws.sendEVENT(dataDesk);
 ```
 
-### WebApp
+## WebApp
 ```
 npm run dev
 ```
-### Servers
+## Servers
 For running the servers you need to build then execute it on the docker app
-#### WebSocket
+### WebSocket
 ```
 docker build . -t smart-home-websocket
 docker run -p 5000:5000 smart-home-websocket
 ```
-#### API
+### API
 ```
 docker build . -t smart-home-api
 docker run -p 8080:8080 smart-home-api
 ```
-#### MSSQL
+### MSSQL
 Pulling the Microsoft SQL database docker images from Microsoft
 ```
 docker pull mcr.microsoft.com/mssql/server:2022-latest
@@ -180,6 +198,243 @@ VALUES
 ---
 # Configuration
 In order to use the system you have to configure the webapp and the ESP32 to connect to the servers via IP and their port and also you have to set your wifi `ssid` and `password` credentials in your ESP32 project
+
+---
+### Kubernetes and docker
+#### How to create:
+
+#### Docker
+
+- Pull registry
+
+```
+docker pull registry
+Using default tag: latest
+latest: Pulling from library/registry
+Digest: sha256:543dade69668e02e5768d7ea2b0aa4fae6aa7384c9a5a8dbecc2be5136079ddb
+Status: Image is up to date for registry:latest
+docker.io/library/registry:latest
+```
+
+- Run the registry:
+
+```
+docker run -d -p 5000:5000 --restart=always --name registry registry
+```
+
+- Tag the desired image
+
+```
+docker tag websocket-server:latest localhost:5000/websocket-server:latest
+```
+
+- Push the desired image to registry
+
+```
+docker push localhost:5000/websocket-server:latest
+```
+
+- Checking if the image is pushed:
+
+```
+curl http://localhost:5000/v2/_catalog
+```
+
+#### Good to know docker parancsok
+
+```
+docker images
+docker images -a
+docker ps
+docker rm …
+docker rmi -f 7b44d932df87
+```
+
+#### Kubernetes
+
+- Set the [localhost](http://localhost) registry
+
+```
+sudo nano /etc/rancher/k3s/registries.yaml
+```
+
+```
+mirrors:
+  "localhost:5000":
+    endpoint:
+      - "http://localhost:5000"
+```
+
+- Restart
+
+```
+ sudo systemctl restart k3s
+```
+
+- Delete pod
+
+```
+sudo kubectl delete pod -l app=websocket-server
+```
+
+- Make the deployment file
+
+```
+nano websocket-deployment.yaml 
+```
+
+yaml:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: websocket-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: websocket-server
+  template:
+    metadata:
+      labels:
+        app: websocket-server
+    spec:
+      containers:
+      - name: websocket-server
+        image: localhost:5000/websocket-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: websocket-service
+spec:
+  selector:
+    app: websocket-server
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: NodePort
+```
+
+- Run the deployment file
+
+```
+sudo kubectl apply -f websocket-deployment.yaml
+```
+
+- Checking the pods and services
+
+```
+sudo kubectl get pods
+sudo kubectl get services
+```
+
+- Reset kubernetes:
+
+```
+/usr/local/bin/k3s-killall.sh
+sudo systemctl stop k3s
+sudo systemctl start k3s
+sudo systemctl status k3s
+```
+
+#### Kubernetes Dashboard
+
+- Apply dashboard
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+```
+
+- Get dashboard pods
+```
+kubectl get pods -n kubernetes-dashboard
+```
+
+- Edit dashboard service
+```
+kubectl -n kubernetes-dashboard edit service kubernetes-dashboard
+```
+
+- Change the type to NodePort:
+```
+spec:
+  type: NodePort
+```
+
+- Get port
+```
+kubectl -n kubernetes-dashboard get service kubernetes-dashboard
+```
+
+- Acces the dashboard
+```
+https://192.168.1.133:NodePort
+```
+
+- Create the token
+dashboard-admin.yaml
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+```
+
+- Apply token
+```
+kubectl apply -f dashboard-admin.yaml
+```
+
+- Get token
+```
+kubectl -n kubernetes-dashboard create token admin-user
+```
+#### Update Server from git
+
+- Pull from GitHub
+```
+git pull origin main
+```
+- Build image
+```
+sudo docker build -t localhost:5000/ws-server:latest .
+```
+- Push to local storage
+```
+docker push localhost:5000/ws-server:latest
+```
+- Restart deployment
+```
+sudo kubectl rollout restart deployment ws-server
+```
+- Apply deployment
+```
+sudo kubectl apply -f kub-deployment.yaml
+```
+- Get token
+```
+kubectl -n kubernetes-dashboard create token admin-user
+```
+
 
 ---
 # How it works ?
